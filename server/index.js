@@ -42,11 +42,12 @@ const PORT = 3002;
 // Enable CORS - this allows our frontend (running on a different port) to communicate with the backend
 app.use(cors());
 
-// Parse JSON bodies (as sent by API clients)
-app.use(express.json());
+// Configure Express to handle larger JSON payloads
+// The default limit is 100kb, which is too small for large PDF texts
+app.use(express.json({ limit: '50mb' }));
 
-// Parse URL-encoded bodies (as sent by HTML forms)
-app.use(express.urlencoded({ extended: true }));
+// Configure Express to handle larger URL-encoded payloads
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Create a temporary directory for storing uploaded files if it doesn't exist
 const uploadDir = path.join(__dirname, 'temp-uploads');
@@ -167,12 +168,17 @@ app.post('/chat', async (req, res) => {
     
     // Create a prompt for the OpenAI API that includes both the PDF text and the question
     // This helps the AI understand the context and provide a relevant answer
+    // We're limiting the text to 8000 characters (about 2000 tokens) to avoid token limits
+    // and reduce the request size
+    const maxPdfTextLength = 8000;
+    const truncatedPdfText = pdfText.substring(0, maxPdfTextLength);
+    
     const prompt = `
       I have the following text extracted from a PDF document:
       
-      ${pdfText.substring(0, 15000)}
+      ${truncatedPdfText}
       
-      ${pdfText.length > 15000 ? '... [text truncated due to length] ...' : ''}
+      ${pdfText.length > maxPdfTextLength ? '... [text truncated due to length] ...' : ''}
       
       Based on this document, please answer the following question:
       ${question}

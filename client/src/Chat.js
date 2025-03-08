@@ -80,12 +80,20 @@ function Chat({ pdfText }) {
       // Set loading state to true to show a loading indicator
       setIsLoading(true);
 
+      // For very large PDFs, we'll truncate the text on the client side
+      // to reduce the request size and improve performance
+      // The server will further truncate if needed
+      const maxTextLength = 100000; // 100KB limit for the request
+      const truncatedPdfText = pdfText.length > maxTextLength 
+        ? pdfText.substring(0, maxTextLength) 
+        : pdfText;
+
       // Use axios to send a POST request to the server
       // axios is a popular HTTP client for making requests to servers
       // We're using the async/await syntax to handle the asynchronous request
       const response = await axios.post('http://localhost:3002/chat', {
         question: userQuestion,
-        pdfText: pdfText
+        pdfText: truncatedPdfText
       });
 
       // Extract the answer from the response
