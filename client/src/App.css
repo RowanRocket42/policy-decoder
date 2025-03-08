@@ -208,4 +208,41 @@ button:disabled {
   margin-top: 2rem;
   border-top: 2px solid #dee2e6;
   padding-top: 1.5rem;
+  margin-bottom: 0;
+}
+
+/* Dark mode styles for better integration with Chat component */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #e4e4e4;
+  }
+  
+  .App {
+    background-color: #121212;
+  }
+  
+  .App-header {
+    background-color: #1e1e2e;
+  }
+  
+  .upload-container {
+    background-color: #1e1e2e;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .extracted-text-container {
+    background-color: #2d2d3a;
+    border-color: #383850;
+  }
+  
+  .extracted-text {
+    background-color: #383850;
+    color: #e4e4e4;
+    border-color: #4a4a6a;
+  }
+  
+  .chat-section {
+    border-color: #383850;
+  }
 } 

@@ -147,7 +147,6 @@ function Upload() {
       */}
       {pdfText && (
         <div className="chat-section">
-          <h2>Ask Questions About This Document</h2>
           <Chat pdfText={pdfText} />
         </div>
       )}

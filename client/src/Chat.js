@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import './Chat.css'; // Import the new CSS file
 
 /**
  * Chat Component
@@ -19,6 +20,19 @@ function Chat({ pdfText }) {
   const [messages, setMessages] = useState([]);
   const [newQuestion, setNewQuestion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Create a ref for the messages container to scroll to bottom
+  const messagesEndRef = useRef(null);
+
+  // Function to scroll to the bottom of the messages list
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // useEffect hook to scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
 
   /**
    * handleInputChange
@@ -132,7 +146,10 @@ function Chat({ pdfText }) {
 
   return (
     <div className="chat-container">
-      <h2>Ask Questions About This Document</h2>
+      {/* Chat header with title */}
+      <div className="chat-header">
+        <h2>Ask Questions About This Document</h2>
+      </div>
       
       {/* Display a message if no PDF text is provided */}
       {!pdfText && (
@@ -141,19 +158,20 @@ function Chat({ pdfText }) {
         </p>
       )}
       
-      {/* The messages list */}
+      {/* The messages list - this is where all the chat bubbles appear */}
       <div className="messages-list">
+        {/* Map through each message and create a chat bubble */}
         {messages.map((message, index) => (
           <div 
             key={index} 
             className={`message ${message.type}`}
           >
-            {/* Display a label for each message */}
-            <div className="message-label">
+            {/* Hidden label for screen readers */}
+            <span className="message-label">
               {message.type === 'question' ? 'You:' : 'AI:'}
-            </div>
+            </span>
             
-            {/* Display the message text */}
+            {/* The actual message text */}
             <div className="message-text">
               {message.text}
             </div>
@@ -163,14 +181,18 @@ function Chat({ pdfText }) {
         {/* Show a loading indicator when waiting for a response */}
         {isLoading && (
           <div className="message answer loading">
-            <div className="message-label">AI:</div>
+            <span className="message-label">AI:</span>
             <div className="message-text">Thinking...</div>
           </div>
         )}
+        
+        {/* Invisible element to scroll to */}
+        <div ref={messagesEndRef} />
       </div>
       
       {/* The input area for new questions */}
       <div className="chat-input-container">
+        {/* Text input field */}
         <input
           type="text"
           value={newQuestion}
@@ -180,6 +202,8 @@ function Chat({ pdfText }) {
           disabled={!pdfText || isLoading}
           className="chat-input"
         />
+        
+        {/* Send button */}
         <button 
           onClick={handleSubmitQuestion}
           disabled={!pdfText || !newQuestion.trim() || isLoading}

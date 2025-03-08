@@ -1,0 +1,188 @@
+/* Chat.css - Styles for the Chat component */
+
+/* Main container for the chat interface */
+.chat-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #1e1e2e; /* Dark background color */
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  height: 600px; /* Fixed height for the chat container */
+  color: #e4e4e4; /* Light text color for dark background */
+}
+
+/* Header styles */
+.chat-header {
+  text-align: center;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #383850;
+  color: #ffffff;
+}
+
+/* Message when no PDF is uploaded */
+.no-pdf-message {
+  background-color: #2d2d3a;
+  color: #ff9494;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  margin: 20px 0;
+}
+
+/* Container for the list of messages */
+.messages-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  /* Custom scrollbar for the messages list */
+  scrollbar-width: thin;
+  scrollbar-color: #4a4a6a #2d2d3a;
+}
+
+/* Styling for the scrollbar */
+.messages-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages-list::-webkit-scrollbar-track {
+  background: #2d2d3a;
+  border-radius: 4px;
+}
+
+.messages-list::-webkit-scrollbar-thumb {
+  background-color: #4a4a6a;
+  border-radius: 4px;
+}
+
+/* Base message style */
+.message {
+  max-width: 80%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  position: relative;
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+
+/* User question message style */
+.message.question {
+  align-self: flex-end;
+  background-color: #4caf50; /* Green background for user messages */
+  color: white;
+  border-bottom-right-radius: 4px; /* Pointed edge on bottom right */
+  margin-left: auto;
+}
+
+/* AI answer message style */
+.message.answer {
+  align-self: flex-start;
+  background-color: #2979ff; /* Blue background for AI messages */
+  color: white;
+  border-bottom-left-radius: 4px; /* Pointed edge on bottom left */
+  margin-right: auto;
+}
+
+/* Loading message style */
+.message.loading {
+  background-color: #3d3d56;
+  color: #cccccc;
+}
+
+/* Animation for the loading indicator */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.message.loading .message-text {
+  animation: pulse 1.5s infinite;
+}
+
+/* Input container at the bottom */
+.chat-input-container {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background-color: #2d2d3a;
+  border-radius: 8px;
+  margin-top: auto; /* Push to bottom */
+}
+
+/* Text input field */
+.chat-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #383850;
+  color: #ffffff;
+  font-size: 16px;
+  outline: none;
+  transition: background-color 0.3s;
+}
+
+.chat-input:focus {
+  background-color: #424260;
+}
+
+.chat-input::placeholder {
+  color: #9e9eb3;
+}
+
+.chat-input:disabled {
+  background-color: #2d2d3a;
+  color: #6c6c8b;
+  cursor: not-allowed;
+}
+
+/* Send button */
+.chat-submit-button {
+  padding: 12px 20px;
+  background-color: #2979ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-submit-button:hover:not(:disabled) {
+  background-color: #1565c0;
+}
+
+.chat-submit-button:disabled {
+  background-color: #3d3d56;
+  color: #9e9eb3;
+  cursor: not-allowed;
+}
+
+/* Message content */
+.message-text {
+  white-space: pre-wrap;
+}
+
+/* Hide the message labels visually but keep them for screen readers */
+.message-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+} 
