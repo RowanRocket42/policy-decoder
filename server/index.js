@@ -149,7 +149,7 @@ app.post('/analyze', upload.single('file'), async (req, res) => {
     
     // Call the OpenAI API to analyze the policy
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       messages: [
         { 
           role: 'system', 
@@ -281,7 +281,7 @@ app.post('/chat', async (req, res) => {
     
     // Call the OpenAI API to generate a response
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       messages: [
         { 
           role: 'system', 
