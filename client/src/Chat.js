@@ -7,7 +7,7 @@ import './Chat.css'; // Import the CSS file
  * 
  * This component provides a Grok-like chat interface for asking questions about PDF content.
  * Features:
- * - Dark/light theme toggle with localStorage persistence
+ * - Dark theme with Grok-style message bubbles
  * - Markdown support for AI responses
  * - Auto-expanding textarea for user input
  * - Animated message bubbles
@@ -19,22 +19,17 @@ import './Chat.css'; // Import the CSS file
 function Chat({ pdfText }) {
   // ===== STATE MANAGEMENT =====
   // Store chat messages (questions and answers)
-  const [messages, setMessages] = useState([]);
+  // Initialize with default welcome message and user greeting
+  const [messages, setMessages] = useState([
+    { type: 'question', text: 'Hey', isNew: false },
+    { type: 'answer', text: 'Hey there! How can I assist you today?', isNew: false }
+  ]);
   
   // Store the current question being typed
   const [newQuestion, setNewQuestion] = useState('');
   
   // Track if we're waiting for a response
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Track the current theme (dark or light)
-  // We initialize it from localStorage if available, otherwise default to dark
-  const [isDarkTheme, setIsDarkTheme] = useState(() => {
-    // Try to get the theme from localStorage
-    const savedTheme = localStorage.getItem('chatTheme');
-    // Return true for dark theme if no saved preference or it was explicitly set to 'dark'
-    return savedTheme === null ? true : savedTheme === 'dark';
-  });
   
   // ===== REFS =====
   // Reference to the messages container for scrolling
@@ -48,19 +43,6 @@ function Chat({ pdfText }) {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading]);
-  
-  // Effect to save theme preference to localStorage when it changes
-  useEffect(() => {
-    localStorage.setItem('chatTheme', isDarkTheme ? 'dark' : 'light');
-    // Add or remove a class from the body to affect global styles if needed
-    if (isDarkTheme) {
-      document.body.classList.add('dark-theme');
-      document.body.classList.remove('light-theme');
-    } else {
-      document.body.classList.add('light-theme');
-      document.body.classList.remove('dark-theme');
-    }
-  }, [isDarkTheme]);
   
   // Effect to auto-resize the textarea as content changes
   useEffect(() => {
@@ -111,16 +93,6 @@ function Chat({ pdfText }) {
       // Submit the question
       handleSubmitQuestion();
     }
-  };
-
-  /**
-   * toggleTheme
-   * 
-   * Toggles between dark and light themes.
-   * The theme preference is saved to localStorage through the useEffect hook.
-   */
-  const toggleTheme = () => {
-    setIsDarkTheme(prevTheme => !prevTheme);
   };
 
   /**
@@ -218,16 +190,7 @@ function Chat({ pdfText }) {
   };
 
   return (
-    <div className={`chat-container ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}>
-      {/* Theme toggle button */}
-      <button 
-        className="theme-toggle" 
-        onClick={toggleTheme} 
-        aria-label={isDarkTheme ? 'Switch to light theme' : 'Switch to dark theme'}
-      >
-        {isDarkTheme ? '☀️' : '🌙'}
-      </button>
-      
+    <div className="chat-container">
       {/* Messages container - centered vertically and horizontally */}
       <div className="messages-container">
         {/* Display a message if no PDF text is provided */}

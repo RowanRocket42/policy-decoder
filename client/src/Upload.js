@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Chat from './Chat'; // Import the Chat component
 import './Chat.css'; // Import the CSS file for styling
 
@@ -9,8 +9,11 @@ import './Chat.css'; // Import the CSS file for styling
  * for asking questions about the uploaded PDF.
  * 
  * Features:
- * - Grok-style welcome page with upload button
- * - Conditional rendering to switch between welcome page and chat interface
+ * - Grok-style homepage with dark background and centered content
+ * - Status message showing the current PDF being analyzed
+ * - Upload button for selecting a new PDF
+ * - Input bar at the bottom for asking questions
+ * - Conditional rendering to switch between homepage and chat interface
  * - PDF file validation
  * - Loading state during file upload
  */
@@ -31,16 +34,15 @@ function Upload() {
   // Track if an upload is in progress
   const [isLoading, setIsLoading] = useState(false);
   
-  // Get the time of day for the welcome message
-  const timeOfDay = (() => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'morning';
-    if (hour < 18) return 'afternoon';
-    return 'evening';
-  })();
+  // Store the current question being typed
+  const [question, setQuestion] = useState('');
   
-  // Get the user's name (in a real app, this would come from authentication)
-  const userName = 'User';
+  // ===== REFS =====
+  // Reference to the file input element
+  const fileInputRef = useRef(null);
+  
+  // Reference to the textarea for auto-expanding
+  const textareaRef = useRef(null);
 
   /**
    * handleFileChange
@@ -142,7 +144,7 @@ function Upload() {
    * handleReset
    * 
    * This function resets the component state to allow uploading a different PDF.
-   * It switches back to the welcome page view.
+   * It switches back to the homepage view.
    */
   const handleReset = () => {
     setFile(null);
@@ -150,57 +152,138 @@ function Upload() {
     setPdfText('');
     setIsUploaded(false);
   };
+  
+  /**
+   * handleInputChange
+   * 
+   * Updates the question state as the user types.
+   * 
+   * @param {Event} event - The change event from the textarea
+   */
+  const handleInputChange = (event) => {
+    setQuestion(event.target.value);
+  };
+  
+  /**
+   * handleKeyPress
+   * 
+   * Handles keyboard shortcuts:
+   * - Enter (without Shift) submits the question
+   * - Shift+Enter adds a new line
+   * 
+   * @param {Event} event - The keypress event from the textarea
+   */
+  const handleKeyPress = (event) => {
+    // Check if Enter was pressed without Shift key
+    if (event.key === 'Enter' && !event.shiftKey) {
+      // Prevent the default action (new line)
+      event.preventDefault();
+      // Submit the question
+      handleSubmitQuestion();
+    }
+  };
+  
+  /**
+   * handleSubmitQuestion
+   * 
+   * Processes the user's question when they click the send button.
+   * In the homepage view, this prompts the user to upload a PDF first.
+   */
+  const handleSubmitQuestion = () => {
+    // Don't submit if the question is empty or just whitespace
+    if (!question.trim()) {
+      return;
+    }
+    
+    // If no PDF is uploaded, show a message to upload one first
+    if (!isUploaded) {
+      setMessage('Please upload a PDF first to ask questions about it.');
+      // Clear the input field
+      setQuestion('');
+      return;
+    }
+    
+    // Clear the input field (the actual submission is handled in Chat.js)
+    setQuestion('');
+  };
+  
+  /**
+   * triggerFileInput
+   * 
+   * Programmatically clicks the hidden file input when the upload button is clicked.
+   */
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
+  };
 
   return (
     <div className="app-container">
       {/* 
         Conditional rendering based on isUploaded state:
         - If a PDF has been uploaded successfully, show the Chat component
-        - Otherwise, show the Grok-style welcome page
+        - Otherwise, show the Grok-style homepage
       */}
       {!isUploaded ? (
-        // Welcome page - shown when no PDF has been uploaded yet
-        <div className="welcome-container">
-          {/* Welcome message with time of day */}
-          <h2 className="welcome-message">Good {timeOfDay}, {userName}.</h2>
+        // Homepage - shown when no PDF has been uploaded yet
+        <div className="grok-homepage">
+          {/* Status message - shows if a file is selected but not yet uploaded */}
+          <div className="status-message">
+            {file ? `Analyzing: ${file.name}` : 'No PDF uploaded yet'}
+          </div>
           
-          {/* Subheading */}
-          <h1 className="welcome-subheading">How can I help you today?</h1>
-          
-          {/* File input styled as a button */}
+          {/* Upload button */}
           <div className="upload-button-container">
             {/* 
               The actual file input is hidden
-              We style the label to look like a button instead
+              We style the button to trigger it instead
             */}
             <input 
               type="file" 
-              id="file-input"
+              ref={fileInputRef}
               onChange={handleFileChange} 
               accept=".pdf"
               className="file-input" 
             />
-            <label 
-              htmlFor="file-input" 
+            <button 
+              onClick={triggerFileInput}
               className={`upload-button ${isLoading ? 'loading' : ''}`}
+              disabled={isLoading}
             >
-              {isLoading ? 'Uploading...' : 'Upload a PDF to analyze'}
-            </label>
+              {isLoading ? 'Uploading...' : 'Upload Different PDF'}
+            </button>
           </div>
           
           {/* Display error messages to the user */}
-          {message && message.includes('Error') && (
+          {message && (
             <p className="error-message">{message}</p>
           )}
+          
+          {/* Input bar at the bottom */}
+          <div className="homepage-input-container">
+            <textarea
+              ref={textareaRef}
+              value={question}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyPress}
+              placeholder="Ask a question about document..."
+              className="homepage-input"
+              rows="1"
+            />
+            <button 
+              onClick={handleSubmitQuestion}
+              className="homepage-submit-button"
+              aria-label="Send message"
+            >
+              ➡️
+            </button>
+          </div>
         </div>
       ) : (
         // Chat interface - shown after a PDF has been uploaded successfully
         <div className="chat-view">
-          {/* Small header with file info and reset button */}
-          <div className="chat-header-bar">
-            <div className="file-info-small">
-              <span>Analyzing: {file?.name}</span>
-            </div>
+          {/* Status message showing the current PDF */}
+          <div className="chat-status-message">
+            <span>Analyzing: {file?.name}</span>
             <button onClick={handleReset} className="reset-button">
               Upload Different PDF
             </button>
