@@ -56,10 +56,11 @@ function HomePage() {
     
     // Simulate file upload (in a real app, this would be an API call)
     setTimeout(() => {
-      // Navigate to the upload page for medical insurance (as an example)
-      // In a real implementation, you would determine the insurance type
-      // based on the file content or user selection
-      navigate('/upload/medical');
+      // Generate a policy ID based on the current timestamp
+      const policyId = `medical-${Date.now()}`;
+      
+      // Navigate to the chat page with the policy ID
+      navigate(`/chat/${policyId}`);
     }, 1500);
   };
   

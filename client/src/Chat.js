@@ -28,8 +28,8 @@ function Chat() {
   // Store chat messages (questions and answers)
   // Initialize with default welcome message and user greeting
   const [messages, setMessages] = useState([
-    { type: 'question', text: 'Hey', isNew: false },
-    { type: 'answer', text: 'Hey there! How can I assist you with your policy today?', isNew: false }
+    { type: 'question', text: 'Hi, I just uploaded my policy', isNew: false },
+    { type: 'answer', text: 'Welcome! I\'ve analyzed your policy and created a summary above. You can ask me any specific questions about your coverage, limits, or anything else you\'d like to know about your policy.', isNew: false }
   ]);
   
   // Store the current question being typed
@@ -235,6 +235,50 @@ function Chat() {
               </svg>
               Back to Home
             </button>
+          </div>
+        )}
+        
+        {/* Policy Summary */}
+        {policyData && (
+          <div className="policy-summary">
+            <div className="summary-section">
+              <h2>What's Covered</h2>
+              <ul>
+                {policyData.covered.map((item, index) => (
+                  <li key={`covered-${index}`}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            
+            <div className="summary-section">
+              <h2>What's Not Covered</h2>
+              <ul>
+                {policyData.notCovered.map((item, index) => (
+                  <li key={`not-covered-${index}`}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            
+            <div className="summary-section">
+              <h2>Policy Limits</h2>
+              <ul>
+                {policyData.limits.map((item, index) => (
+                  <li key={`limit-${index}`}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            
+            <div className="summary-section">
+              <h2>Contact Information</h2>
+              <p><strong>Phone:</strong> {policyData.contact.phone}</p>
+              <p><strong>Email:</strong> {policyData.contact.email}</p>
+              <p><strong>Website:</strong> {policyData.contact.website}</p>
+            </div>
+            
+            <div className="chat-prompt">
+              <h3>Have questions about your policy?</h3>
+              <p>Use the chat below to ask specific questions about your coverage, limits, or anything else you'd like to know.</p>
+            </div>
           </div>
         )}
         
