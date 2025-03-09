@@ -32,7 +32,7 @@
 /* 
  * Base styles
  */
-body {
+html, body {
   font-family: 'Poppins', sans-serif;
   margin: 0;
   padding: 0;
@@ -40,6 +40,9 @@ body {
   background-color: var(--background-color);
   line-height: 1.6;
   overflow-x: hidden;
+  overflow-y: auto; /* Explicitly allow vertical scrolling */
+  height: auto; /* Allow content to determine height */
+  min-height: 100%;
 }
 
 /* 
@@ -50,6 +53,8 @@ body {
   flex-direction: column;
   min-height: 100vh;
   background: linear-gradient(135deg, #f0f4f8 0%, #e6f0ff 100%);
+  overflow-y: auto; /* Allow scrolling within the container */
+  position: relative; /* Ensure proper stacking context */
 }
 
 /* 
@@ -129,6 +134,7 @@ body {
   display: flex;
   flex-direction: column;
   width: 100%;
+  overflow-y: auto; /* Allow scrolling within main content */
 }
 
 /* 
@@ -141,7 +147,7 @@ body {
   padding: var(--spacing-xl) var(--spacing-lg);
   min-height: 80vh;
   position: relative;
-  overflow: hidden;
+  overflow: visible; /* Allow content to overflow for animations */
   transition: opacity 0.5s ease;
 }
 
@@ -259,6 +265,7 @@ section {
   opacity: 0.7;
   transition: opacity 0.5s ease;
   scroll-margin-top: 80px;
+  overflow: visible; /* Allow content to be visible */
 }
 
 section.active {

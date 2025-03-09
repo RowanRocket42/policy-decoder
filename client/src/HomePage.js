@@ -124,7 +124,7 @@ function HomePage() {
       sections.forEach(section => {
         const sectionTop = section.offsetTop;
         const sectionHeight = section.offsetHeight;
-        const scrollY = window.scrollY;
+        const scrollY = window.scrollY || window.pageYOffset; // Add fallback for older browsers
         
         if (scrollY > sectionTop - window.innerHeight / 2 && 
             scrollY < sectionTop + sectionHeight - window.innerHeight / 2) {
@@ -132,6 +132,10 @@ function HomePage() {
         }
       });
     };
+    
+    // Ensure scrolling is enabled
+    document.body.style.overflow = 'auto';
+    document.documentElement.style.overflow = 'auto';
     
     window.addEventListener('scroll', handleScroll);
     
@@ -166,7 +170,14 @@ function HomePage() {
   const scrollToSection = (sectionId) => {
     const section = document.getElementById(sectionId);
     if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
+      // Use scrollIntoView with behavior: 'smooth' for smooth scrolling
+      section.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+      
+      // Update active section
+      setActiveSection(sectionId);
     }
   };
   
