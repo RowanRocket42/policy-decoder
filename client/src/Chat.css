@@ -478,4 +478,136 @@
     right: 10px;             /* Closer to edge */
     padding: 6px;            /* Smaller padding */
   }
+}
+
+/* Welcome page styles */
+
+/* 
+ * Welcome container
+ * This is the main container for the welcome page
+ * Uses flexbox for centering content vertically and horizontally
+ */
+.welcome-container {
+  display: flex;              /* Use flexbox for layout */
+  flex-direction: column;     /* Stack children vertically */
+  justify-content: center;    /* Center content vertically */
+  align-items: center;        /* Center content horizontally */
+  width: 100%;                /* Take full width of parent */
+  max-width: 800px;           /* Limit width as requested */
+  height: 80vh;               /* 80% of viewport height as requested */
+  max-height: 600px;          /* Maximum height as requested */
+  padding: 20px;              /* Add space around content as requested */
+  text-align: center;         /* Center text */
+}
+
+/* 
+ * Welcome message
+ * "Good afternoon, User." text
+ */
+.welcome-message {
+  font-size: 24px;            /* Font size as requested */
+  color: #cccccc;             /* Light grey color as requested */
+  margin-bottom: 10px;        /* Space below the message */
+  font-weight: normal;        /* Not too bold */
+}
+
+/* 
+ * Welcome subheading
+ * "How can I help you today?" text
+ */
+.welcome-subheading {
+  font-size: 32px;            /* Font size as requested */
+  color: #ffffff;             /* White color as requested */
+  margin-bottom: 40px;        /* Space below the subheading */
+  font-weight: bold;          /* Make it stand out */
+}
+
+/* 
+ * Upload button container
+ * Wraps the file input and its label
+ */
+.upload-button-container {
+  margin-bottom: 20px;        /* Space below the container */
+  width: 100%;                /* Take full width */
+  max-width: 300px;           /* Limit width for better appearance */
+}
+
+/* 
+ * File input
+ * Hidden because we style the label instead
+ */
+.file-input {
+  width: 0.1px;               /* Nearly invisible */
+  height: 0.1px;              /* Nearly invisible */
+  opacity: 0;                 /* Invisible */
+  overflow: hidden;           /* Hide overflow */
+  position: absolute;         /* Position absolutely */
+  z-index: -1;                /* Behind other elements */
+}
+
+/* 
+ * Upload button
+ * This is actually a label styled as a button
+ */
+.upload-button {
+  display: block;             /* Block element */
+  width: 100%;                /* Take full width of container */
+  padding: 10px 20px;         /* Padding as requested */
+  background-color: #2a2a2a;  /* Dark grey background as requested */
+  color: #cccccc;             /* Light grey text as requested */
+  border-radius: 25px;        /* Rounded corners as requested */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow as requested */
+  cursor: pointer;            /* Hand cursor on hover */
+  text-align: center;         /* Center text */
+  transition: background-color 0.3s; /* Smooth transition for hover effect */
+  font-size: 16px;            /* Readable font size */
+  border: none;               /* No border */
+}
+
+/* 
+ * Upload button hover effect
+ * Changes background color on hover
+ */
+.upload-button:hover {
+  background-color: #333333;  /* Slightly lighter on hover as requested */
+}
+
+/* 
+ * Upload button loading state
+ * Visual feedback when uploading
+ */
+.upload-button.loading {
+  background-color: #333333;  /* Slightly lighter when loading */
+  cursor: not-allowed;        /* Not-allowed cursor */
+  opacity: 0.8;               /* Slightly transparent */
+}
+
+/* 
+ * Error message
+ * Displayed when there's an error uploading
+ */
+.error-message {
+  color: #ff6b6b;             /* Light red color */
+  margin-top: 20px;           /* Space above the message */
+  font-size: 14px;            /* Smaller font size */
+}
+
+/* 
+ * Responsive styles for smaller screens
+ * Adjust layout for mobile devices
+ */
+@media (max-width: 600px) {
+  .welcome-container {
+    max-width: 90%;           /* 90% width on mobile as requested */
+    padding: 10px;            /* Smaller padding as requested */
+  }
+  
+  .welcome-message {
+    font-size: 20px;          /* Smaller font size as requested */
+  }
+  
+  .welcome-subheading {
+    font-size: 28px;          /* Smaller font size as requested */
+    margin-bottom: 30px;      /* Less space below */
+  }
 } 
