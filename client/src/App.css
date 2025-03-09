@@ -15,8 +15,9 @@ body {
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-y: auto; /* Allow vertical scrolling */
+  overflow: hidden; /* Prevent scrolling */
   width: 100%;
+  height: 100vh; /* Full viewport height */
 }
 
 /* Main App container */
@@ -146,7 +147,8 @@ button:disabled {
 
 /* Chat Component Styles */
 .chat-container {
-  max-width: 800px;
+  max-width: 100%;
+  width: 100%;
   margin: 2rem auto;
   padding: 2rem;
   background-color: #f8f9fa;
@@ -163,7 +165,8 @@ button:disabled {
 }
 
 .messages-list {
-  max-height: 400px;
+  max-height: 600px;
+  width: 100%;
   overflow-y: auto;
   margin-bottom: 1rem;
   padding: 1rem;
@@ -207,6 +210,7 @@ button:disabled {
 .chat-input-container {
   display: flex;
   gap: 0.5rem;
+  width: 100%;
 }
 
 .chat-input {

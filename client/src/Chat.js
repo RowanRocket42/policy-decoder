@@ -26,11 +26,8 @@ function Chat() {
   
   // ===== STATE MANAGEMENT =====
   // Store chat messages (questions and answers)
-  // Initialize with default welcome message and user greeting
-  const [messages, setMessages] = useState([
-    { type: 'question', text: 'Hi, I just uploaded my policy', isNew: false },
-    { type: 'answer', text: 'Welcome! I\'ve analyzed your policy and created a summary above. You can ask me any specific questions about your coverage, limits, or anything else you\'d like to know about your policy.', isNew: false }
-  ]);
+  // Initialize with an empty array since we don't want default messages
+  const [messages, setMessages] = useState([]);
   
   // Store the current question being typed
   const [newQuestion, setNewQuestion] = useState('');
@@ -40,6 +37,9 @@ function Chat() {
   
   // Store the policy data
   const [policyData, setPolicyData] = useState(null);
+  
+  // Track if the chat interface is visible
+  const [showChat, setShowChat] = useState(false);
   
   // ===== REFS =====
   // Reference to the messages container for scrolling
@@ -51,23 +51,42 @@ function Chat() {
   // ===== EFFECTS =====
   // Effect to fetch policy data when component mounts
   useEffect(() => {
-    // In a real implementation, we would fetch the policy data from the server
-    // For now, we'll use mock data based on the policy ID
     const fetchPolicyData = async () => {
       try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Show loading state
+        setIsLoading(true);
         
-        // Extract policy type and timestamp from policy ID (format: type-timestamp)
-        const [policyType] = policyId.split('-');
+        // Make an API call to fetch the policy data
+        const response = await fetch(`http://localhost:3002/policy/${policyId}`);
         
-        // Get mock policy data based on policy type
-        const mockData = getMockPolicyData(policyType);
+        // Check if the response is ok
+        if (!response.ok) {
+          throw new Error('Failed to fetch policy data');
+        }
         
-        // Update policy data state
-        setPolicyData(mockData);
+        // Parse the JSON response
+        const data = await response.json();
+        
+        // Check if the response contains policy data
+        if (data.status === 'success' && data.policyData) {
+          // Update policy data state with real data
+          setPolicyData(data.policyData);
+        } else {
+          // If no policy data is found, fall back to mock data
+          console.warn('No policy data found, using mock data instead');
+          const [policyType] = policyId.split('-');
+          const mockData = getMockPolicyData(policyType);
+          setPolicyData(mockData);
+        }
       } catch (error) {
         console.error('Error fetching policy data:', error);
+        // Fall back to mock data in case of error
+        const [policyType] = policyId.split('-');
+        const mockData = getMockPolicyData(policyType);
+        setPolicyData(mockData);
+      } finally {
+        // Hide loading state
+        setIsLoading(false);
       }
     };
     
@@ -160,41 +179,73 @@ function Chat() {
       // Show loading indicator
       setIsLoading(true);
 
-      // In a real implementation, we would send the question to the server
-      // For now, we'll simulate a response after a delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Generate a mock response based on the question and policy data
-      const mockResponse = generateMockResponse(userQuestion, policyData);
-      
-      // Add the AI's answer to the messages
-      setMessages(prevMessages => [
-        ...prevMessages,
-        { type: 'answer', text: mockResponse, isNew: true }
-      ]);
+      // Send the question to the server
+      const response = await fetch('http://localhost:3002/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question: userQuestion,
+          policyId: policyId
+        }),
+      });
+
+      // Check if the response is ok
+      if (!response.ok) {
+        throw new Error('Failed to get response from server');
+      }
+
+      // Parse the JSON response
+      const data = await response.json();
+
+      // Check if the response contains an answer
+      if (data.status === 'success' && data.answer) {
+        // Add the AI's answer to the messages
+        setMessages(prevMessages => [
+          ...prevMessages,
+          { type: 'answer', text: data.answer, isNew: true }
+        ]);
+      } else {
+        // Handle error case
+        setMessages(prevMessages => [
+          ...prevMessages,
+          { 
+            type: 'answer', 
+            text: 'I apologize, but I encountered an error while processing your question. Please try again.',
+            isError: true,
+            isNew: true 
+          }
+        ]);
+      }
       
       // After a short delay, remove the 'isNew' flag to stop the animation
       setTimeout(() => {
         setMessages(prevMessages => 
-          prevMessages.map((msg, idx) => 
-            idx === prevMessages.length - 1 || idx === prevMessages.length - 2
-              ? { ...msg, isNew: false }
-              : msg
-          )
+          prevMessages.map(msg => ({ ...msg, isNew: false }))
         );
       }, 500);
       
     } catch (error) {
-      console.error('Error getting answer:', error);
+      console.error('Error sending question:', error);
       
-      // Create a detailed error message
-      let errorMessage = 'Sorry, there was an error processing your question. Please try again.';
-      
-      // Add the error message to the chat
+      // Add an error message
       setMessages(prevMessages => [
         ...prevMessages,
-        { type: 'answer', text: errorMessage, isNew: true, isError: true }
+        { 
+          type: 'answer', 
+          text: 'I apologize, but I encountered an error while processing your question. Please try again.',
+          isError: true,
+          isNew: true 
+        }
       ]);
+      
+      // After a short delay, remove the 'isNew' flag
+      setTimeout(() => {
+        setMessages(prevMessages => 
+          prevMessages.map(msg => ({ ...msg, isNew: false }))
+        );
+      }, 500);
     } finally {
       // Hide loading indicator
       setIsLoading(false);
@@ -211,6 +262,15 @@ function Chat() {
     navigate('/');
   };
 
+  /**
+   * toggleChat
+   * 
+   * Toggles between showing the policy summary and the chat interface
+   */
+  const toggleChat = () => {
+    setShowChat(!showChat);
+  };
+
   return (
     <div className="chat-page-container">
       {/* Top Navigation Bar */}
@@ -225,8 +285,8 @@ function Chat() {
       
       {/* Main Content */}
       <main className="chat-main-content">
-        {/* Policy Info */}
-        {policyData && (
+        {/* Policy Info - Only show when not in chat view */}
+        {policyData && !showChat && (
           <div className="policy-info">
             <h1 className="policy-name">{policyData.name}</h1>
             <button className="back-to-policy" onClick={handleBackToPolicy}>
@@ -239,8 +299,18 @@ function Chat() {
         )}
         
         {/* Policy Summary */}
-        {policyData && (
+        {policyData && !showChat && (
           <div className="policy-summary">
+            <div className="summary-section">
+              <h2>Summary</h2>
+              <p>{`This ${policyData.name} provides comprehensive coverage for ${policyData.type === 'medical' ? 'healthcare needs' : 
+                policyData.type === 'home' ? 'your home and belongings' : 
+                policyData.type === 'auto' ? 'your vehicle and related liabilities' : 
+                policyData.type === 'travel' ? 'travel-related risks and emergencies' : 
+                policyData.type === 'life' ? 'financial security for your beneficiaries' : 
+                'your insurance needs'}. It offers protection against common risks while maintaining specific exclusions and conditions.`}</p>
+            </div>
+            
             <div className="summary-section">
               <h2>What's Covered</h2>
               <ul>
@@ -260,7 +330,7 @@ function Chat() {
             </div>
             
             <div className="summary-section">
-              <h2>Policy Limits</h2>
+              <h2>Limits & Conditions</h2>
               <ul>
                 {policyData.limits.map((item, index) => (
                   <li key={`limit-${index}`}>{item}</li>
@@ -269,87 +339,125 @@ function Chat() {
             </div>
             
             <div className="summary-section">
-              <h2>Contact Information</h2>
+              <h2>Important Contacts</h2>
               <p><strong>Phone:</strong> {policyData.contact.phone}</p>
               <p><strong>Email:</strong> {policyData.contact.email}</p>
               <p><strong>Website:</strong> {policyData.contact.website}</p>
             </div>
             
+            <div className="summary-section">
+              <h2>Potential Issues</h2>
+              <ul>
+                <li>Check if the coverage limits align with the actual value of your {policyData.type === 'home' ? 'property and belongings' : 
+                  policyData.type === 'auto' ? 'vehicle' : 
+                  policyData.type === 'medical' ? 'potential medical expenses' : 
+                  policyData.type === 'travel' ? 'travel plans and valuables' : 
+                  policyData.type === 'life' ? 'financial obligations' : 'insured items'}.</li>
+                <li>Review the exclusions carefully to ensure you understand what is not covered.</li>
+                <li>Verify the excess/deductible amounts to assess your out-of-pocket expenses in case of a claim.</li>
+              </ul>
+            </div>
+            
             <div className="chat-prompt">
               <h3>Have questions about your policy?</h3>
               <p>Use the chat below to ask specific questions about your coverage, limits, or anything else you'd like to know.</p>
+              <button className="primary-button" onClick={toggleChat}>
+                Chat with your Policy
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="button-icon">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
             </div>
           </div>
         )}
         
         {/* Chat Container */}
-        <div className="chat-container">
-          {/* Messages container */}
-          <div className="messages-container">
-            {/* Messages list */}
-            <div className="messages-list">
-              {messages.map((message, index) => (
-                <div 
-                  key={index} 
-                  className={`message ${message.type} ${message.isNew ? 'fade-in' : ''} ${message.isError ? 'error' : ''}`}
-                >
-                  {/* Message content - use ReactMarkdown for AI responses */}
-                  <div className="message-text">
-                    {message.type === 'answer' ? (
-                      <ReactMarkdown>{message.text}</ReactMarkdown>
-                    ) : (
-                      message.text
-                    )}
-                  </div>
-                </div>
-              ))}
-              
-              {/* Loading indicator */}
-              {isLoading && (
-                <div className="message answer loading fade-in">
-                  <div className="message-text">
-                    <div className="typing-indicator">
-                      <span></span>
-                      <span></span>
-                      <span></span>
+        {policyData && showChat && (
+          <div className="chat-view-container">
+            <div className="chat-header">
+              <button className="back-to-summary" onClick={toggleChat}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back to Policy Summary
+              </button>
+            </div>
+            
+            <div className="chat-container">
+              {/* Messages container */}
+              <div className="messages-container">
+                {/* Messages list */}
+                <div className="messages-list">
+                  {messages.length === 0 && !isLoading ? (
+                    <div className="empty-chat-message">
+                      <p>Ask a question about your policy to get started.</p>
                     </div>
-                  </div>
+                  ) : (
+                    messages.map((message, index) => (
+                      <div 
+                        key={index} 
+                        className={`message ${message.type} ${message.isNew ? 'fade-in' : ''} ${message.isError ? 'error' : ''}`}
+                      >
+                        {/* Message content - use ReactMarkdown for AI responses */}
+                        <div className="message-text">
+                          {message.type === 'answer' ? (
+                            <ReactMarkdown>{message.text}</ReactMarkdown>
+                          ) : (
+                            message.text
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  
+                  {/* Loading indicator */}
+                  {isLoading && (
+                    <div className="message answer loading fade-in">
+                      <div className="message-text">
+                        <div className="typing-indicator">
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Invisible element to scroll to */}
+                  <div ref={messagesEndRef} />
                 </div>
-              )}
+              </div>
               
-              {/* Invisible element to scroll to */}
-              <div ref={messagesEndRef} />
+              {/* Input area */}
+              <div className="chat-input-container">
+                {/* Auto-expanding textarea */}
+                <textarea
+                  ref={textareaRef}
+                  value={newQuestion}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Ask a question about your policy..."
+                  disabled={isLoading}
+                  className="chat-input"
+                  rows="1"
+                />
+                
+                {/* Send button */}
+                <button 
+                  onClick={handleSubmitQuestion}
+                  disabled={!newQuestion.trim() || isLoading}
+                  className="chat-submit-button"
+                  aria-label="Send message"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
-          
-          {/* Input area */}
-          <div className="chat-input-container">
-            {/* Auto-expanding textarea */}
-            <textarea
-              ref={textareaRef}
-              value={newQuestion}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyPress}
-              placeholder="Ask a question about your policy..."
-              disabled={isLoading}
-              className="chat-input"
-              rows="1"
-            />
-            
-            {/* Send button */}
-            <button 
-              onClick={handleSubmitQuestion}
-              disabled={!newQuestion.trim() || isLoading}
-              className="chat-submit-button"
-              aria-label="Send message"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
-            </button>
-          </div>
-        </div>
+        )}
       </main>
       
       {/* Footer */}
@@ -389,156 +497,151 @@ function getMockPolicyData(type) {
         'Overseas medical treatment'
       ],
       limits: [
-        'Annual limit of $100,000 for hospital treatment',
+        'Annual limit of R100,000 for hospital treatment',
         'Waiting period of 2 months for general treatment',
         'Waiting period of 12 months for major dental',
         'Gap payments may apply for some services',
-        'Excess of $500 per hospital admission'
+        'Excess of R500 per hospital admission'
       ],
       contact: {
-        phone: '1-800-HEALTH-COVER',
-        email: 'support@healthinsurer.com',
-        website: 'https://www.healthinsurer.com',
-        address: '123 Medical Plaza, Healthcare City, HC 12345'
+        phone: '0800-123-456',
+        email: 'support@healthinsurer.co.za',
+        website: 'www.healthinsurer.co.za'
       }
     },
-    car: {
-      name: 'AutoProtect Premium Policy',
-      type: 'car',
+    home: {
+      name: 'HomeShield Complete Policy',
+      type: 'home',
       covered: [
-        'Damage to your vehicle from accidents',
+        'Building damage from fire, flood, and storms',
+        'Theft and vandalism',
+        'Accidental damage to fixtures and fittings',
+        'Temporary accommodation costs',
+        'Legal liability up to R20 million'
+      ],
+      notCovered: [
+        'Gradual deterioration and wear and tear',
+        'Mechanical or electrical breakdown',
+        'Damage caused by pests (termites, rats)',
+        'Items specifically excluded in the policy',
+        'Damage from earth movement (except earthquake)'
+      ],
+      limits: [
+        'Building sum insured: R750,000',
+        'Contents sum insured: R150,000',
+        'Valuable items limit: R5,000 per item',
+        'Excess of R500 for most claims',
+        'Flood damage excess of R1,000'
+      ],
+      contact: {
+        phone: '0860-123-456',
+        email: 'claims@homeinsurer.co.za',
+        website: 'www.homeinsurer.co.za'
+      }
+    },
+    auto: {
+      name: 'AutoGuard Premium Policy',
+      type: 'auto',
+      covered: [
+        'Damage to your vehicle from collision',
         'Damage to other vehicles or property',
         'Theft of your vehicle',
-        'Fire and weather damage',
-        'Windscreen and glass repair'
+        'Weather damage (hail, flood)',
+        'Hijacking and vehicle recovery'
       ],
       notCovered: [
         'General wear and tear',
         'Mechanical or electrical failure',
-        'Driving under the influence',
-        'Using vehicle for commercial purposes',
-        'Driving without a valid license'
+        'Damage while driving under influence',
+        'Using vehicle for rideshare without disclosure',
+        'Racing or testing'
       ],
       limits: [
-        'Maximum coverage of $20,000 for your vehicle',
-        'Third-party property damage limit of $5 million',
-        'Excess of $750 for drivers under 25',
-        'Standard excess of $500 per claim',
-        'No claims bonus reduced after each claim'
+        'Agreed value: R350,000',
+        'Third party property damage: R20 million',
+        'Windscreen excess waiver (one claim per year)',
+        'Standard excess: R750',
+        'Young driver excess (under 25): additional R1,200'
       ],
       contact: {
-        phone: '1-800-CAR-INSURE',
-        email: 'claims@carinsurer.com',
-        website: 'https://www.carinsurer.com',
-        address: '456 Vehicle Avenue, Motorville, MV 67890'
+        phone: '0860-234-567',
+        email: 'claims@autoinsurer.co.za',
+        website: 'www.autoinsurer.co.za'
       }
     },
-    home: {
-      name: 'HomeSafe Complete Policy',
-      type: 'home',
+    travel: {
+      name: 'TravelSafe Plus Policy',
+      type: 'travel',
       covered: [
-        'Building damage from fire, storm, flood',
-        'Theft or attempted theft',
-        'Vandalism or malicious damage',
-        'Temporary accommodation costs',
-        'Legal liability for incidents at your home'
+        'Medical expenses overseas',
+        'Trip cancellation and interruption',
+        'Lost, stolen or damaged luggage',
+        'Travel delays and missed connections',
+        'Emergency evacuation and repatriation'
       ],
       notCovered: [
-        'Gradual deterioration or wear and tear',
-        'Pest damage (termites, vermin)',
-        'Deliberate damage by tenants',
-        'Items specifically excluded in policy',
-        'Business equipment or stock'
+        'Pre-existing medical conditions (unless declared)',
+        'Incidents while under influence of alcohol/drugs',
+        'Extreme sports (unless add-on purchased)',
+        'Travel to countries with travel warnings',
+        'Pandemics (unless specified coverage)'
       ],
       limits: [
-        'Building cover up to $500,000',
-        'Contents cover up to $100,000',
-        'Valuable items limited to $2,500 per item',
-        'Excess of $500 per claim',
-        'Flood coverage limited in high-risk areas'
+        'Medical coverage: R10 million',
+        'Cancellation coverage: up to R25,000',
+        'Luggage coverage: up to R10,000',
+        'Travel delay: R200 per day (max R2,000)',
+        'Excess: R100 per claim'
       ],
       contact: {
-        phone: '1-800-HOME-SAFE',
-        email: 'support@homeinsurer.com',
-        website: 'https://www.homeinsurer.com',
-        address: '789 Property Lane, Homeville, HV 54321'
+        phone: '0860-345-678',
+        email: 'assist@travelinsurer.co.za',
+        website: 'www.travelinsurer.co.za'
       }
     },
     life: {
-      name: 'LifeSecure Family Protection Plan',
+      name: 'LifeSecure Premium Policy',
       type: 'life',
       covered: [
         'Death benefit payment to beneficiaries',
         'Terminal illness benefit',
         'Total and permanent disability option',
-        'Critical illness coverage',
-        'Funeral expenses benefit'
+        'Funeral expenses advance payment',
+        'Inflation protection'
       ],
       notCovered: [
-        'Death from suicide in first 13 months',
-        'Self-inflicted injuries',
-        'Pre-existing conditions not disclosed',
-        'Hazardous activities not declared',
-        'Death while engaging in criminal activity'
+        'Suicide within first 13 months',
+        'Death from pre-existing conditions (if not disclosed)',
+        'Death while engaging in illegal activities',
+        'Misrepresentation on application',
+        'War or terrorism related death'
       ],
       limits: [
-        'Coverage amount depends on premium paid',
-        'Waiting period of 90 days for critical illness',
-        'Age limit for application (usually 65)',
-        'Medical examination may be required',
-        'Premium increases with age'
+        'Death benefit: R500,000',
+        'Terminal illness advance: 100% of death benefit',
+        'Minimum entry age: 18 years',
+        'Maximum entry age: 65 years',
+        'Policy term: to age 99'
       ],
       contact: {
-        phone: '1-800-LIFE-COVER',
-        email: 'support@lifeinsurer.com',
-        website: 'https://www.lifeinsurer.com',
-        address: '101 Security Street, Safetown, ST 13579'
-      }
-    },
-    travel: {
-      name: 'GlobalGuard Travel Insurance',
-      type: 'travel',
-      covered: [
-        'Medical emergencies and hospital expenses',
-        'Trip cancellation or interruption',
-        'Lost, stolen or damaged baggage',
-        'Travel delays over 12 hours',
-        'Emergency evacuation and repatriation'
-      ],
-      notCovered: [
-        'Pre-existing medical conditions',
-        'Travel to countries with travel warnings',
-        'Extreme sports without additional coverage',
-        'Incidents related to alcohol or drug use',
-        'Items left unattended'
-      ],
-      limits: [
-        'Medical coverage up to $10 million',
-        'Baggage coverage up to $5,000',
-        'Electronics limited to $1,000 per item',
-        'Trip cancellation coverage up to trip cost',
-        'Excess of $100 per claim'
-      ],
-      contact: {
-        phone: '1-800-TRAVEL-SAFE',
-        email: 'claims@travelinsurer.com',
-        website: 'https://www.travelinsurer.com',
-        address: '202 Journey Road, Traveltown, TT 24680'
+        phone: '0860-456-789',
+        email: 'service@lifeinsurer.co.za',
+        website: 'www.lifeinsurer.co.za'
       }
     }
   };
   
+  // Return the mock data for the specified type, or a default if not found
   return mockData[type] || {
     name: 'Generic Insurance Policy',
     type: 'generic',
-    covered: ['Basic coverage items would be listed here'],
-    notCovered: ['Exclusions would be listed here'],
-    limits: ['Limits and conditions would be listed here'],
+    covered: ['Basic coverage items'],
+    notCovered: ['Standard exclusions'],
+    limits: ['Standard policy limits'],
     contact: {
-      phone: '1-800-INSURANCE',
-      email: 'support@insurer.com',
-      website: 'https://www.insurer.com',
-      address: '123 Insurance Street, Coverage City, CC 12345'
+      phone: '0860-123-456',
+      email: 'support@insurer.co.za',
+      website: 'www.insurer.co.za'
     }
   };
 }
@@ -550,97 +653,72 @@ function getMockPolicyData(type) {
  * 
  * @param {string} question - The user's question
  * @param {Object} policyData - The policy data
- * @returns {string} The mock AI response
+ * @returns {string} The mock response
  */
 function generateMockResponse(question, policyData) {
+  // Convert question to lowercase for easier matching
+  const q = question.toLowerCase();
+  
   // If no policy data, return a generic response
   if (!policyData) {
     return "I'm sorry, I don't have information about your policy yet. Please try again later.";
   }
   
-  // Convert question to lowercase for easier matching
-  const lowerQuestion = question.toLowerCase();
-  
-  // Check for different types of questions
-  if (lowerQuestion.includes('covered') || lowerQuestion.includes('coverage')) {
-    return `
-## Coverage Information
-
-Your policy (${policyData.name}) covers the following:
-
-${policyData.covered.map(item => `✅ ${item}`).join('\n')}
-
-Is there anything specific about your coverage you'd like to know more about?
-    `;
+  // Check for greetings
+  if (q.includes('hello') || q.includes('hi') || q.includes('hey')) {
+    return `Hello! I'm your policy assistant for your ${policyData.name}. How can I help you today?`;
   }
   
-  if (lowerQuestion.includes('not covered') || lowerQuestion.includes('exclusion')) {
-    return `
-## Exclusions
-
-Your policy (${policyData.name}) does **not** cover the following:
-
-${policyData.notCovered.map(item => `❌ ${item}`).join('\n')}
-
-It's important to be aware of these exclusions to avoid unexpected costs.
-    `;
+  // Check for coverage questions
+  if (q.includes('cover') || q.includes('covered') || q.includes('coverage')) {
+    return `Your ${policyData.name} covers the following:\n\n${policyData.covered.map(item => `- ${item}`).join('\n')}`;
   }
   
-  if (lowerQuestion.includes('limit') || lowerQuestion.includes('condition') || lowerQuestion.includes('waiting')) {
-    return `
-## Limits and Conditions
-
-Your policy (${policyData.name}) has the following limits and conditions:
-
-${policyData.limits.map(item => `⚠️ ${item}`).join('\n')}
-
-These limits and conditions affect how and when you can claim.
-    `;
+  // Check for exclusion questions
+  if (q.includes('not covered') || q.includes('excluded') || q.includes('exclusion')) {
+    return `Your ${policyData.name} does **not** cover the following:\n\n${policyData.notCovered.map(item => `- ${item}`).join('\n')}`;
   }
   
-  if (lowerQuestion.includes('contact') || lowerQuestion.includes('phone') || lowerQuestion.includes('email')) {
-    return `
-## Contact Information
-
-You can contact your insurance provider using the following details:
-
-📞 **Phone:** ${policyData.contact.phone}
-✉️ **Email:** ${policyData.contact.email}
-🌐 **Website:** ${policyData.contact.website}
-📍 **Address:** ${policyData.contact.address}
-
-Their customer service is available Monday to Friday, 9am to 5pm.
-    `;
+  // Check for limit questions
+  if (q.includes('limit') || q.includes('maximum') || q.includes('cap')) {
+    return `Your ${policyData.name} has the following limits and conditions:\n\n${policyData.limits.map(item => `- ${item}`).join('\n')}`;
   }
   
-  if (lowerQuestion.includes('claim') || lowerQuestion.includes('file a claim')) {
-    return `
-## How to File a Claim
-
-To file a claim for your ${policyData.name}:
-
-1. **Contact your insurer** at ${policyData.contact.phone} or visit ${policyData.contact.website}
-2. **Provide your policy details** and explain the situation
-3. **Submit any required documentation** (photos, receipts, police reports if applicable)
-4. **Follow up** if you don't hear back within 5-7 business days
-
-Remember that claims typically need to be filed within 30 days of the incident.
-    `;
+  // Check for contact questions
+  if (q.includes('contact') || q.includes('call') || q.includes('email') || q.includes('phone')) {
+    return `You can contact your insurance provider for the ${policyData.name} using the following information:\n\n- Phone: ${policyData.contact.phone}\n- Email: ${policyData.contact.email}\n- Website: ${policyData.contact.website}`;
   }
   
-  // Default response for other questions
-  return `
-I'd be happy to help you with your question about your ${policyData.name}.
-
-Based on your policy details, I can provide information about:
-- What's covered
-- What's not covered
-- Policy limits and conditions
-- Contact information
-- How to file a claim
-
-Could you please clarify what specific aspect of your policy you'd like to know more about?
-  `;
+  // Check for claim questions
+  if (q.includes('claim') || q.includes('file a') || q.includes('submit')) {
+    return `To file a claim for your ${policyData.name}, you should:\n\n1. Contact your insurer at ${policyData.contact.phone}\n2. Provide your policy number and details of the incident\n3. Submit any required documentation\n4. Follow up on your claim status through the website: ${policyData.contact.website}`;
+  }
+  
+  // Check for premium questions
+  if (q.includes('premium') || q.includes('cost') || q.includes('price') || q.includes('pay')) {
+    return `Premium information is not available in this chat interface. Please contact customer service at ${policyData.contact.phone} for details about your premium, payment options, and due dates.`;
+  }
+  
+  // Check for South African specific questions
+  if (q.includes('south africa') || q.includes('sa') || q.includes('rsa') || q.includes('rand') || q.includes('zar')) {
+    return `Your ${policyData.name} is designed for the South African market and complies with local insurance regulations. All monetary values are in South African Rand (ZAR). For specific questions about South African insurance laws or regulations that might affect your policy, please contact your insurer directly.`;
+  }
+  
+  // Check for policy type specific questions
+  if (policyData.type === 'medical' && (q.includes('hospital') || q.includes('doctor') || q.includes('surgery'))) {
+    return `Your ${policyData.name} covers hospital accommodation in a standard room and surgical procedures. There's an annual limit of R100,000 for hospital treatment, and an excess of R500 per hospital admission applies.`;
+  }
+  
+  if (policyData.type === 'home' && (q.includes('flood') || q.includes('fire') || q.includes('theft'))) {
+    return `Your ${policyData.name} covers building damage from fire, flood, and storms, as well as theft and vandalism. However, please note that the flood damage excess is R1,000, higher than the standard excess of R500 for most other claims.`;
+  }
+  
+  if (policyData.type === 'auto' && (q.includes('accident') || q.includes('crash') || q.includes('collision') || q.includes('hijacking'))) {
+    return `Your ${policyData.name} covers damage to your vehicle from collision, as well as damage to other vehicles or property. It also includes coverage for hijacking. The standard excess is R750, but if the driver is under 25, an additional young driver excess of R1,200 applies.`;
+  }
+  
+  // Default response if no specific match
+  return `I understand you're asking about your ${policyData.name}. Could you please be more specific about what you'd like to know? You can ask about what's covered, what's not covered, policy limits, or how to contact your insurer.`;
 }
 
 export default Chat; 
