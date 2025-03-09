@@ -1,0 +1,258 @@
+/* PolicySummary.css - Styles for the policy summary display */
+
+/* 
+ * Main container for the policy summary
+ */
+.policy-summary-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* 
+ * Policy header section
+ */
+.policy-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* 
+ * Policy title
+ */
+.policy-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2a7de1;
+  margin: 0 0 8px;
+}
+
+/* 
+ * Policy subtitle (insurance type)
+ */
+.policy-subtitle {
+  font-size: 18px;
+  color: #666666;
+  margin: 0;
+}
+
+/* 
+ * Policy content container
+ */
+.policy-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+}
+
+/* 
+ * Individual policy section
+ */
+.policy-section {
+  margin-bottom: 24px;
+}
+
+/* 
+ * Section title with icon
+ */
+.section-title {
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333333;
+  margin: 0 0 16px;
+}
+
+/* 
+ * Icon in section title
+ */
+.icon {
+  margin-right: 8px;
+  font-size: 24px;
+}
+
+/* 
+ * List of items
+ */
+.item-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 
+ * Individual list item
+ */
+.item-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* 
+ * Covered item styling
+ */
+.covered-item {
+  color: #4caf50;
+}
+
+/* 
+ * Not covered item styling
+ */
+.not-covered-item {
+  color: #f44336;
+}
+
+/* 
+ * Limit/condition item styling
+ */
+.limit-item {
+  color: #ff9800;
+}
+
+/* 
+ * Contact section styling
+ */
+.contact-section {
+  grid-column: 1 / -1;
+  background-color: #f5f9ff;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+/* 
+ * Contact information container
+ */
+.contact-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+/* 
+ * Contact information paragraph
+ */
+.contact-info p {
+  margin: 0;
+  color: #666666;
+}
+
+/* 
+ * Contact information links
+ */
+.contact-info a {
+  color: #2a7de1;
+  text-decoration: none;
+}
+
+.contact-info a:hover {
+  text-decoration: underline;
+}
+
+/* 
+ * Ask question container
+ */
+.ask-question-container {
+  margin-top: 32px;
+  text-align: center;
+}
+
+/* 
+ * Ask question button
+ */
+.ask-question-button {
+  background-color: #2a7de1;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: 0 4px 12px rgba(42, 125, 225, 0.2);
+}
+
+.ask-question-button:hover {
+  background-color: #1a6fd3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(42, 125, 225, 0.3);
+}
+
+/* 
+ * Loading state
+ */
+.policy-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 0;
+}
+
+/* 
+ * Loading spinner
+ */
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e0e0e0;
+  border-top: 4px solid #2a7de1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 
+ * Responsive styles
+ */
+@media (max-width: 768px) {
+  .policy-summary-container {
+    padding: 24px;
+  }
+  
+  .policy-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .policy-title {
+    font-size: 24px;
+  }
+  
+  .policy-subtitle {
+    font-size: 16px;
+  }
+  
+  .section-title {
+    font-size: 18px;
+  }
+  
+  .contact-info {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .policy-summary-container {
+    padding: 16px;
+  }
+  
+  .policy-title {
+    font-size: 20px;
+  }
+  
+  .ask-question-button {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+} 

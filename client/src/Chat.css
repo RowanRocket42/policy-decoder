@@ -1,23 +1,106 @@
 /* Chat.css - Styles for the Chat component */
 
 /* 
- * App container
- * Wraps the entire application
+ * Chat page container
+ * Wraps the entire chat page
  */
-.app-container {
-  width: 100%;               /* Take full width */
-  min-height: 100vh;         /* Take full viewport height */
-  display: flex;             /* Use flexbox for layout */
-  justify-content: center;   /* Center content horizontally */
-  align-items: center;       /* Center content vertically */
-  background-color: #1e1e1e; /* Dark background as requested */
+.chat-page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f9f9f9;
+  font-family: 'Poppins', sans-serif;
 }
 
 /* 
- * Grok-style homepage
- * Shown before a PDF is uploaded
+ * Top navigation bar
  */
-.grok-homepage {
+.top-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* 
+ * Brand name in the navigation
+ */
+.brand-name {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2a7de1;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.brand-name:hover {
+  color: #1a6fd3;
+}
+
+/* 
+ * Main content area
+ */
+.chat-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* 
+ * Policy info section
+ */
+.policy-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 24px;
+}
+
+/* 
+ * Policy name
+ */
+.policy-name {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2a7de1;
+  margin: 0;
+}
+
+/* 
+ * Back to policy button
+ */
+.back-to-policy {
+  background: none;
+  border: none;
+  color: #666666;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 8px 0;
+  transition: color 0.3s;
+}
+
+.back-to-policy:hover {
+  color: #333333;
+}
+
+/* 
+ * Main container for the chat interface
+ * Uses flexbox for layout and fixed height to prevent scrolling
+ */
+.chat-container {
   max-width: 800px;          /* Limit width for better readability as requested */
   width: 100%;               /* Take full width up to max-width */
   margin: 0 auto;            /* Center horizontally */
@@ -30,228 +113,10 @@
   max-height: 600px;         /* Maximum height as requested */
   position: relative;        /* For absolute positioning of children */
   overflow: hidden;          /* Prevent scrolling of container */
-  justify-content: center;   /* Center content vertically */
-  align-items: center;       /* Center content horizontally as requested */
-}
-
-/* 
- * Status message
- * Shows the current PDF being analyzed
- */
-.status-message {
-  font-size: 16px;           /* Font size as requested */
-  color: #cccccc;            /* Light grey color as requested */
-  margin-bottom: 30px;       /* Space below the message */
-  text-align: center;        /* Center text */
-  width: 100%;               /* Take full width */
-  padding: 10px;             /* Space inside the message */
-  position: absolute;        /* Position absolutely */
-  top: 20px;                 /* Position from top */
-}
-
-/* 
- * Upload button container
- * Wraps the file input and button
- */
-.upload-button-container {
-  margin-bottom: 20px;       /* Space below the container */
-  width: 100%;               /* Take full width */
-  max-width: 300px;          /* Limit width for better appearance */
-  display: flex;             /* Use flexbox */
-  justify-content: center;   /* Center horizontally */
-}
-
-/* 
- * File input
- * Hidden because we style the button instead
- */
-.file-input {
-  width: 0.1px;              /* Nearly invisible */
-  height: 0.1px;             /* Nearly invisible */
-  opacity: 0;                /* Invisible */
-  overflow: hidden;          /* Hide overflow */
-  position: absolute;        /* Position absolutely */
-  z-index: -1;               /* Behind other elements */
-}
-
-/* 
- * Upload button
- * Used to trigger the file input
- */
-.upload-button {
-  display: block;            /* Block element */
-  width: 100%;               /* Take full width of container */
-  padding: 10px 20px;        /* Padding as requested */
-  background-color: #2a2a2a; /* Dark grey background as requested */
-  color: #cccccc;            /* Light grey text as requested */
-  border-radius: 25px;       /* Rounded corners as requested */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow as requested */
-  cursor: pointer;           /* Hand cursor on hover */
-  text-align: center;        /* Center text */
-  transition: background-color 0.3s; /* Smooth transition for hover effect */
-  font-size: 16px;           /* Readable font size */
-  border: none;              /* No border */
-}
-
-/* 
- * Upload button hover effect
- * Changes background color on hover
- */
-.upload-button:hover {
-  background-color: #333;    /* Slightly lighter on hover as requested */
-}
-
-/* 
- * Upload button loading state
- * Visual feedback when uploading
- */
-.upload-button.loading {
-  background-color: #333;    /* Slightly lighter when loading */
-  cursor: not-allowed;       /* Not-allowed cursor */
-  opacity: 0.8;              /* Slightly transparent */
-}
-
-/* 
- * Error message
- * Displayed when there's an error or message to show
- */
-.error-message {
-  color: #ff6b6b;            /* Light red color for errors */
-  margin-top: 10px;          /* Space above the message */
-  margin-bottom: 10px;       /* Space below the message */
-  font-size: 14px;           /* Smaller font size */
-  text-align: center;        /* Center text */
-  max-width: 80%;            /* Limit width */
-}
-
-/* 
- * Homepage input container
- * Contains the textarea and send button at the bottom
- */
-.homepage-input-container {
-  display: flex;             /* Use flexbox */
-  align-items: center;       /* Center items vertically */
-  width: 100%;               /* Full width */
-  max-width: 760px;          /* Slightly less than container max-width to account for padding */
-  position: absolute;        /* Position absolutely within the homepage container */
-  bottom: 20px;              /* Position from bottom as requested */
-  margin-top: auto;          /* Push to bottom */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow as requested */
-  border-radius: 25px;       /* Rounded corners as requested */
-  background-color: #1e1e1e; /* Match the overall background as requested */
-  padding: 0;                /* No padding on container */
-  overflow: hidden;          /* Hide overflow */
-}
-
-/* 
- * Homepage text input field (textarea)
- * For asking questions about the document
- */
-.homepage-input {
-  flex: 1;                   /* Take up available space */
-  padding: 10px 20px;        /* Space inside textarea as requested */
-  border: none;              /* No border as requested */
-  background-color: #1e1e1e; /* Match the overall background as requested */
-  color: #cccccc;            /* Light grey text as requested */
-  font-size: 16px;           /* Readable font size */
-  outline: none;             /* No outline on focus */
-  resize: none;              /* Disable manual resizing */
-  min-height: 40px;          /* Minimum height */
-  max-height: 120px;         /* Maximum height */
-  font-family: inherit;      /* Use the same font as the rest of the app */
-  line-height: 1.5;          /* Line spacing */
-  border-radius: 25px;       /* Rounded corners to match container */
-}
-
-.homepage-input::placeholder {
-  color: #777777;            /* Darker grey placeholder */
-}
-
-/* 
- * Homepage send button
- * Positioned inside the textarea on the right
- */
-.homepage-submit-button {
-  position: absolute;        /* Position absolutely */
-  right: 15px;               /* Position from right */
-  top: 50%;                  /* Center vertically */
-  transform: translateY(-50%); /* Center vertically */
-  background: transparent;   /* No background as requested */
-  color: #cccccc;            /* Light grey color as requested */
-  border: none;              /* No border */
-  cursor: pointer;           /* Hand cursor on hover */
-  font-size: 16px;           /* Size for the arrow */
-  padding: 8px;              /* Space around the arrow */
-  display: flex;             /* Center the content */
-  align-items: center;       /* Center vertically */
-  justify-content: center;   /* Center horizontally */
-  transition: color 0.3s;    /* Smooth transition */
-  z-index: 2;                /* Above the textarea */
-}
-
-.homepage-submit-button:hover {
-  color: #ffffff;            /* White on hover */
-}
-
-/* 
- * Chat status message
- * Shows the current PDF being analyzed in the chat view
- */
-.chat-status-message {
-  display: flex;             /* Use flexbox */
-  justify-content: space-between; /* Space between file info and button */
-  align-items: center;       /* Center items vertically */
-  width: 100%;               /* Take full width */
-  padding: 10px 20px;        /* Space inside the message */
-  background-color: #1e1e1e; /* Match the overall background */
-  color: #cccccc;            /* Light grey text as requested */
-  font-size: 16px;           /* Font size as requested */
-  position: absolute;        /* Position absolutely */
-  top: 0;                    /* Position at the top */
-  z-index: 10;               /* Above other elements */
-  border-bottom: 1px solid #333; /* Subtle border */
-}
-
-/* 
- * Reset button
- * Allows uploading a different PDF
- */
-.reset-button {
-  background-color: #2a2a2a; /* Dark grey background as requested */
-  color: #cccccc;            /* Light grey text as requested */
-  border: none;              /* No border */
-  border-radius: 25px;       /* Rounded corners as requested */
-  padding: 5px 10px;         /* Space inside button */
-  font-size: 12px;           /* Small font size */
-  cursor: pointer;           /* Hand cursor on hover */
-  transition: background-color 0.3s; /* Smooth transition */
-}
-
-.reset-button:hover {
-  background-color: #333;    /* Slightly lighter on hover as requested */
-}
-
-/* 
- * Main container for the chat interface
- * Uses flexbox for layout and fixed height to prevent scrolling
- */
-.chat-container {
-  max-width: 800px;          /* Limit width for better readability as requested */
-  margin: 0 auto;            /* Center horizontally */
-  padding: 20px;             /* Add space around content as requested */
-  background-color: #1e1e1e; /* Dark background as requested */
-  color: #ffffff;            /* White text as requested */
-  display: flex;             /* Use flexbox for layout */
-  flex-direction: column;    /* Stack children vertically */
-  height: 80vh;              /* 80% of viewport height as requested */
-  max-height: 600px;         /* Maximum height as requested */
-  position: relative;        /* For absolute positioning of children */
-  overflow: hidden;          /* Prevent scrolling of container */
   justify-content: center;   /* Center content vertically as requested */
   align-items: center;       /* Center content horizontally as requested */
-  border-radius: 0;          /* No rounded corners for Grok-style */
-  box-shadow: none;          /* No shadow for Grok-style */
-  margin-top: 40px;          /* Space for the status message */
+  border-radius: 12px;       /* Rounded corners */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Shadow for depth */
 }
 
 /* 
@@ -549,84 +414,26 @@
 }
 
 /* 
- * Chat view container
- * Contains the chat component
+ * Footer
  */
-.chat-view {
-  width: 100%;               /* Take full width */
-  max-width: 800px;          /* Match container max-width */
-  display: flex;             /* Use flexbox */
-  flex-direction: column;    /* Stack children vertically */
-  height: 80vh;              /* 80% of viewport height */
-  max-height: 600px;         /* Maximum height */
-  position: relative;        /* For absolute positioning of children */
-}
-
-/* 
- * Chat header bar
- * Contains file info and reset button
- */
-.chat-header-bar {
-  display: flex;             /* Use flexbox */
-  justify-content: space-between; /* Space between file info and button */
-  align-items: center;       /* Center items vertically */
-  padding: 10px 20px;        /* Space inside header */
-  background-color: #1e1e1e; /* Match the overall background */
-  border-bottom: 1px solid #333; /* Subtle border */
-  margin-bottom: 10px;       /* Space below header */
-}
-
-/* 
- * File info in header
- * Shows the name of the uploaded PDF
- */
-.file-info-small {
-  font-size: 14px;           /* Smaller font size */
-  color: #cccccc;            /* Light grey text */
+.chat-footer {
+  text-align: center;
+  padding: 24px;
+  background-color: #f5f9ff;
+  color: #666666;
+  font-size: 14px;
+  margin-top: auto;
 }
 
 /* 
  * Responsive styles for smaller screens
  * Adjust layout for mobile devices
  */
-@media (max-width: 600px) {
-  .grok-homepage {
-    max-width: 90%;          /* Use 90% of screen width as requested */
-    padding: 10px;           /* Smaller padding as requested */
-  }
-  
-  .status-message {
-    font-size: 14px;         /* Smaller font size as requested */
-  }
-  
-  .upload-button {
-    font-size: 14px;         /* Smaller font size as requested */
-    padding: 8px 15px;       /* Smaller padding */
-  }
-  
-  .homepage-input-container {
-    width: 90%;              /* Match container width */
-    max-width: calc(90% - 20px); /* Account for padding */
-  }
-  
-  .homepage-input {
-    padding: 8px 15px;       /* Smaller padding */
-    font-size: 14px;         /* Smaller font size as requested */
-  }
-  
-  .homepage-submit-button {
-    right: 10px;             /* Closer to edge */
-    padding: 6px;            /* Smaller padding */
-  }
-  
-  .chat-status-message {
-    padding: 5px 10px;       /* Smaller padding */
-    font-size: 14px;         /* Smaller font size */
-  }
-  
-  .reset-button {
-    font-size: 10px;         /* Smaller font size */
-    padding: 3px 8px;        /* Smaller padding */
+@media (max-width: 768px) {
+  .policy-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
   }
   
   .chat-container {
@@ -651,5 +458,15 @@
   .chat-submit-button {
     right: 10px;             /* Closer to edge */
     padding: 6px;            /* Smaller padding */
+  }
+}
+
+@media (max-width: 480px) {
+  .policy-name {
+    font-size: 20px;
+  }
+  
+  .back-to-policy {
+    font-size: 14px;
   }
 } 

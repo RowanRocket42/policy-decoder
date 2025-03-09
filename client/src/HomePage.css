@@ -1,0 +1,244 @@
+/* HomePage.css - Styles for the CoverScan homepage */
+
+/* Import Google Fonts - Poppins for modern, clean typography */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* 
+ * Global styles and variables
+ */
+:root {
+  --primary-color: #2a7de1;       /* Trustworthy blue */
+  --primary-light: #e6f0ff;       /* Light blue for backgrounds */
+  --secondary-color: #4caf50;     /* Reliable green */
+  --secondary-light: #e8f5e9;     /* Light green for accents */
+  --text-dark: #333333;           /* Dark text for readability */
+  --text-medium: #666666;         /* Medium gray for secondary text */
+  --text-light: #999999;          /* Light gray for tertiary text */
+  --background-color: #ffffff;    /* Clean white background */
+  --card-background: #ffffff;     /* White card background */
+  --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+  --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.1); /* Medium shadow for cards */
+  --border-radius: 12px;          /* Rounded corners */
+  --spacing-xs: 8px;              /* Extra small spacing */
+  --spacing-sm: 16px;             /* Small spacing */
+  --spacing-md: 24px;             /* Medium spacing */
+  --spacing-lg: 32px;             /* Large spacing */
+  --spacing-xl: 48px;             /* Extra large spacing */
+  --transition-speed: 0.3s;       /* Smooth transitions */
+}
+
+/* 
+ * Base styles
+ */
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  color: var(--text-dark);
+  background-color: var(--background-color);
+  line-height: 1.6;
+}
+
+/* 
+ * Main container for the homepage
+ */
+.homepage-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* 
+ * Top navigation bar
+ */
+.top-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: var(--background-color);
+  box-shadow: var(--shadow-light);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* 
+ * Brand name in the navigation
+ */
+.brand-name {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--primary-color);
+  letter-spacing: 0.5px;
+}
+
+/* 
+ * Main content area
+ */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* 
+ * Brand section with title and tagline
+ */
+.brand-section {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg) 0;
+}
+
+/* 
+ * Brand title (CoverScan)
+ */
+.brand-title {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0 0 var(--spacing-sm);
+  letter-spacing: -0.5px;
+}
+
+/* 
+ * Brand tagline
+ */
+.brand-tagline {
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--text-medium);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* 
+ * Section title
+ */
+.section-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+}
+
+/* 
+ * Insurance selection section
+ */
+.insurance-selection {
+  width: 100%;
+  margin-bottom: var(--spacing-xl);
+}
+
+/* 
+ * Container for insurance cards
+ */
+.insurance-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+/* 
+ * Individual insurance card
+ */
+.insurance-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-lg);
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  height: 100%;
+}
+
+/* 
+ * Insurance card hover effect
+ */
+.insurance-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-medium);
+  background-color: var(--primary-light);
+}
+
+/* 
+ * Insurance icon
+ */
+.insurance-icon {
+  font-size: 36px;
+  margin-bottom: var(--spacing-sm);
+}
+
+/* 
+ * Insurance title
+ */
+.insurance-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 var(--spacing-xs);
+}
+
+/* 
+ * Insurance description
+ */
+.insurance-description {
+  font-size: 14px;
+  color: var(--text-medium);
+  margin: 0;
+}
+
+/* 
+ * Footer
+ */
+.homepage-footer {
+  text-align: center;
+  padding: var(--spacing-md);
+  background-color: var(--primary-light);
+  color: var(--text-medium);
+  font-size: 14px;
+}
+
+/* 
+ * Responsive styles
+ */
+@media (max-width: 768px) {
+  .brand-title {
+    font-size: 36px;
+  }
+  
+  .brand-tagline {
+    font-size: 18px;
+  }
+  
+  .insurance-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-title {
+    font-size: 32px;
+  }
+  
+  .brand-tagline {
+    font-size: 16px;
+  }
+  
+  .section-title {
+    font-size: 20px;
+  }
+} 
