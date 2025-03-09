@@ -1,316 +1,233 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
 
 /**
  * HomePage Component
  * 
- * This component provides a modern, SaaS-style homepage for CoverScan
- * with brand name, tagline, benefits, pain points, features, and insurance type selection.
+ * This component provides a modern, clean homepage for CoverScan
+ * that emphasizes two main selling points:
+ * 1. Uploading a policy for an AI-generated summary
+ * 2. Chatting with the policy to ask questions
  * 
  * Features:
- * - Clear brand identity with logo and tagline
- * - Core benefits section
- * - Pain points addressed section
- * - Features overview section
- * - Insurance type selection with visually appealing cards
- * - Business description and security assurance
- * - Clean, minimalist design with subtle animations
- * - Responsive layout for all device sizes
+ * - Clean, modern aesthetic with ample whitespace
+ * - Clear call-to-action for policy upload
+ * - Visual representation of the workflow
+ * - Responsive design for all device sizes
  */
 function HomePage() {
   // Navigation hook for redirecting to different pages
   const navigate = useNavigate();
   
-  // State to track which section is currently in view for animations
-  const [activeSection, setActiveSection] = useState('hero');
+  // Reference to the file input element
+  const fileInputRef = useRef(null);
   
-  // Insurance types with icons and descriptions
-  const insuranceTypes = [
-    {
-      id: 'medical',
-      icon: '🩺',
-      title: 'Medical / Health Insurance',
-      description: 'Understand your health coverage, benefits, and exclusions.'
-    },
-    {
-      id: 'car',
-      icon: '🚗',
-      title: 'Car & Vehicle Insurance',
-      description: 'Clarify your auto policy coverage, limits, and deductibles.'
-    },
-    {
-      id: 'home',
-      icon: '🏠',
-      title: 'Household/Homeowners Insurance',
-      description: 'Decode your home protection, liability, and property coverage.'
-    },
-    {
-      id: 'life',
-      icon: '❤️',
-      title: 'Life, Funeral & Critical Illness Cover',
-      description: 'Understand your life insurance benefits and conditions.'
-    },
-    {
-      id: 'travel',
-      icon: '✈️',
-      title: 'Travel Insurance',
-      description: 'Know your travel protection, medical coverage, and exclusions.'
-    }
-  ];
+  // State to track if a file is being uploaded
+  const [isUploading, setIsUploading] = useState(false);
   
-  // Core benefits of using CoverScan
-  const coreBenefits = [
-    {
-      icon: '🔍',
-      title: 'Understand your coverage instantly',
-      description: 'Get immediate clarity on what your policy covers and what it doesn\'t.'
-    },
-    {
-      icon: '🔒',
-      title: 'Secure & private interactions',
-      description: 'No data stored or shared—your information stays completely private.'
-    },
-    {
-      icon: '💬',
-      title: 'Easy policy questions',
-      description: 'Ask specific questions about your policy through our intuitive chat feature.'
-    }
-  ];
-  
-  // Pain points addressed by CoverScan
-  const painPoints = [
-    {
-      icon: '😖',
-      title: 'Frustrated by confusing policy details?',
-      description: 'CoverScan breaks down complex policy language into simple, understandable terms.'
-    },
-    {
-      icon: '📜',
-      title: 'Tired of endless fine print?',
-      description: 'We highlight what matters most, so you don\'t have to wade through pages of text.'
-    },
-    {
-      icon: '❓',
-      title: 'Uncertain about your coverage?',
-      description: 'Get clear answers about what\'s covered, what\'s not, and any important conditions.'
-    }
-  ];
-  
-  // Key features of CoverScan
-  const keyFeatures = [
-    {
-      icon: '📤',
-      title: 'Simple PDF uploads',
-      description: 'Just upload your policy PDF for immediate analysis—no complicated setup required.'
-    },
-    {
-      icon: '📊',
-      title: 'Detailed breakdown',
-      description: 'See a clear breakdown of your coverage, exclusions, and important conditions.'
-    },
-    {
-      icon: '🤖',
-      title: 'Interactive policy Q&A',
-      description: 'Ask specific questions about your policy and get instant, accurate answers.'
-    }
-  ];
-  
-  // Effect to handle scroll events for section animations
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = document.querySelectorAll('section[id]');
-      
-      sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.offsetHeight;
-        const scrollY = window.scrollY || window.pageYOffset; // Add fallback for older browsers
-        
-        if (scrollY > sectionTop - window.innerHeight / 2 && 
-            scrollY < sectionTop + sectionHeight - window.innerHeight / 2) {
-          setActiveSection(section.id);
-        }
-      });
-    };
-    
-    // Ensure scrolling is enabled
-    document.body.style.overflow = 'auto';
-    document.documentElement.style.overflow = 'auto';
-    
-    window.addEventListener('scroll', handleScroll);
-    
-    // Initial check for visible sections
-    handleScroll();
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
+  // State to track any error messages
+  const [errorMessage, setErrorMessage] = useState('');
   
   /**
-   * handleInsuranceSelect
+   * handleFileChange
    * 
-   * Handles the selection of an insurance type and navigates to the
-   * corresponding upload page.
+   * Handles the selection of a file and initiates the upload process
    * 
-   * @param {string} insuranceType - The selected insurance type ID
+   * @param {Event} event - The change event from the file input
    */
-  const handleInsuranceSelect = (insuranceType) => {
-    // Navigate to the upload page with the selected insurance type
-    navigate(`/upload/${insuranceType}`);
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    
+    // If no file was selected, return early
+    if (!selectedFile) return;
+    
+    // Check if the selected file is a PDF
+    if (selectedFile.type !== 'application/pdf') {
+      setErrorMessage('Please select a PDF file');
+      return;
+    }
+    
+    // Clear any previous error messages
+    setErrorMessage('');
+    
+    // Set uploading state to show loading indicator
+    setIsUploading(true);
+    
+    // Simulate file upload (in a real app, this would be an API call)
+    setTimeout(() => {
+      // Navigate to the upload page for medical insurance (as an example)
+      // In a real implementation, you would determine the insurance type
+      // based on the file content or user selection
+      navigate('/upload/medical');
+    }, 1500);
   };
   
   /**
-   * scrollToSection
+   * handleUploadClick
    * 
-   * Scrolls to the specified section smoothly
-   * 
-   * @param {string} sectionId - The ID of the section to scroll to
+   * Triggers the hidden file input when the upload button is clicked
    */
-  const scrollToSection = (sectionId) => {
-    const section = document.getElementById(sectionId);
-    if (section) {
-      // Use scrollIntoView with behavior: 'smooth' for smooth scrolling
-      section.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
-      
-      // Update active section
-      setActiveSection(sectionId);
-    }
+  const handleUploadClick = () => {
+    fileInputRef.current.click();
   };
   
   return (
-    <div className="homepage-container">
-      {/* Top Navigation Bar */}
-      <nav className="top-nav">
-        <div className="brand-name" onClick={() => scrollToSection('hero')}>CoverScan</div>
-        <div className="nav-links">
-          <button onClick={() => scrollToSection('benefits')} className={activeSection === 'benefits' ? 'active' : ''}>Benefits</button>
-          <button onClick={() => scrollToSection('pain-points')} className={activeSection === 'pain-points' ? 'active' : ''}>Pain Points</button>
-          <button onClick={() => scrollToSection('features')} className={activeSection === 'features' ? 'active' : ''}>Features</button>
-          <button onClick={() => scrollToSection('insurance-types')} className={activeSection === 'insurance-types' ? 'active' : ''}>Get Started</button>
-        </div>
-      </nav>
+    <div className="modern-homepage">
+      {/* Header */}
+      <header className="modern-header">
+        <div className="logo">CoverScan</div>
+        <nav className="main-nav">
+          <a href="#how-it-works">How It Works</a>
+          <a href="#features">Features</a>
+          <button className="cta-button-small" onClick={handleUploadClick}>Upload Policy</button>
+        </nav>
+      </header>
       
-      {/* Main Content */}
-      <main className="main-content">
-        {/* Hero Section */}
-        <section id="hero" className={`hero-section ${activeSection === 'hero' ? 'active' : ''}`}>
-          <div className="hero-content">
-            <h1 className="brand-title">CoverScan</h1>
-            <p className="brand-tagline">
-              Instant clarity on your insurance policies. No jargon, no surprises.
-            </p>
-            <button className="cta-button" onClick={() => scrollToSection('insurance-types')}>
-              Get Started
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">Understand your insurance policy in seconds</h1>
+          <p className="hero-description">
+            Stop struggling with dense policy documents. Upload your insurance policy and get instant clarity with AI-powered summaries and interactive chat.
+          </p>
+          <div className="hero-cta">
+            <button className="primary-button" onClick={handleUploadClick}>
+              Upload Your Policy
+              <span className="button-icon">↑</span>
             </button>
-          </div>
-          <div className="hero-image">
-            <div className="abstract-shape shape-1"></div>
-            <div className="abstract-shape shape-2"></div>
-            <div className="abstract-shape shape-3"></div>
-          </div>
-        </section>
-        
-        {/* Benefits Section */}
-        <section id="benefits" className={`benefits-section ${activeSection === 'benefits' ? 'active' : ''}`}>
-          <h2 className="section-title">Core Benefits</h2>
-          <div className="benefits-container">
-            {coreBenefits.map((benefit, index) => (
-              <div key={`benefit-${index}`} className="benefit-card">
-                <div className="benefit-icon">{benefit.icon}</div>
-                <h3 className="benefit-title">{benefit.title}</h3>
-                <p className="benefit-description">{benefit.description}</p>
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              onChange={handleFileChange} 
+              accept=".pdf"
+              className="hidden-file-input" 
+            />
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
+            {isUploading && (
+              <div className="upload-indicator">
+                <div className="spinner"></div>
+                <span>Analyzing your policy...</span>
               </div>
-            ))}
+            )}
           </div>
-        </section>
-        
-        {/* Pain Points Section */}
-        <section id="pain-points" className={`pain-points-section ${activeSection === 'pain-points' ? 'active' : ''}`}>
-          <h2 className="section-title">Common Pain Points</h2>
-          <div className="pain-points-container">
-            {painPoints.map((point, index) => (
-              <div key={`pain-${index}`} className="pain-point-card">
-                <div className="pain-point-icon">{point.icon}</div>
-                <h3 className="pain-point-title">{point.title}</h3>
-                <p className="pain-point-description">{point.description}</p>
+        </div>
+        <div className="hero-image">
+          <div className="device-mockup">
+            <div className="device-screen">
+              <div className="mockup-content">
+                <div className="mockup-message ai">
+                  <p>Your policy covers emergency room visits with a $250 deductible.</p>
+                </div>
+                <div className="mockup-message user">
+                  <p>What about specialist visits?</p>
+                </div>
+                <div className="mockup-message ai">
+                  <p>Specialist visits are covered at 80% after you meet your annual deductible of $1,000.</p>
+                </div>
               </div>
-            ))}
-          </div>
-        </section>
-        
-        {/* Features Section */}
-        <section id="features" className={`features-section ${activeSection === 'features' ? 'active' : ''}`}>
-          <h2 className="section-title">Key Features</h2>
-          <div className="features-container">
-            {keyFeatures.map((feature, index) => (
-              <div key={`feature-${index}`} className="feature-card">
-                <div className="feature-icon">{feature.icon}</div>
-                <h3 className="feature-title">{feature.title}</h3>
-                <p className="feature-description">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-        
-        {/* Business Description Section */}
-        <section id="business-description" className={`business-section ${activeSection === 'business-description' ? 'active' : ''}`}>
-          <div className="business-content">
-            <h2 className="section-title">About CoverScan</h2>
-            <p className="business-description">
-              CoverScan simplifies how you interact with your insurance policies, transforming complex information into straightforward, actionable insights.
-            </p>
-            <div className="security-assurance">
-              <div className="security-icon">🔐</div>
-              <p className="security-text">
-                Your trust matters—CoverScan does not store or share any of your personal data.
-              </p>
             </div>
           </div>
-        </section>
-        
-        {/* Insurance Type Selection */}
-        <section id="insurance-types" className={`insurance-selection ${activeSection === 'insurance-types' ? 'active' : ''}`}>
-          <h2 className="section-title">Select your insurance type</h2>
-          
-          <div className="insurance-cards">
-            {insuranceTypes.map((insurance) => (
-              <button
-                key={insurance.id}
-                className="insurance-card"
-                onClick={() => handleInsuranceSelect(insurance.id)}
-              >
-                <div className="insurance-icon">{insurance.icon}</div>
-                <h3 className="insurance-title">{insurance.title}</h3>
-                <p className="insurance-description">{insurance.description}</p>
-              </button>
-            ))}
+        </div>
+      </section>
+      
+      {/* How It Works Section */}
+      <section id="how-it-works" className="how-it-works-section">
+        <h2 className="section-title">How It Works</h2>
+        <div className="steps-container">
+          <div className="step">
+            <div className="step-number">1</div>
+            <div className="step-icon">📄</div>
+            <h3 className="step-title">Upload Your Policy</h3>
+            <p className="step-description">
+              Simply upload your insurance policy PDF. We support all major insurance types.
+            </p>
           </div>
-        </section>
-      </main>
+          <div className="step">
+            <div className="step-number">2</div>
+            <div className="step-icon">🔍</div>
+            <h3 className="step-title">Get AI Summary</h3>
+            <p className="step-description">
+              Our AI analyzes your policy and provides a clear breakdown of your coverage.
+            </p>
+          </div>
+          <div className="step">
+            <div className="step-number">3</div>
+            <div className="step-icon">💬</div>
+            <h3 className="step-title">Chat With Your Policy</h3>
+            <p className="step-description">
+              Ask specific questions about your coverage and get instant, accurate answers.
+            </p>
+          </div>
+        </div>
+      </section>
+      
+      {/* Features Section */}
+      <section id="features" className="features-section">
+        <h2 className="section-title">Key Features</h2>
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="feature-icon">✅</div>
+            <h3 className="feature-title">Coverage Summary</h3>
+            <p className="feature-description">
+              See what's covered and what's not in a clear, easy-to-understand format.
+            </p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">⚠️</div>
+            <h3 className="feature-title">Limitations & Conditions</h3>
+            <p className="feature-description">
+              Understand important limitations, waiting periods, and conditions.
+            </p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">💬</div>
+            <h3 className="feature-title">Interactive Chat</h3>
+            <p className="feature-description">
+              Ask questions in plain English and get straightforward answers.
+            </p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">🔒</div>
+            <h3 className="feature-title">Private & Secure</h3>
+            <p className="feature-description">
+              Your data stays private. We don't store or share your policy information.
+            </p>
+          </div>
+        </div>
+      </section>
+      
+      {/* CTA Section */}
+      <section className="cta-section">
+        <div className="cta-content">
+          <h2 className="cta-title">Ready to understand your policy?</h2>
+          <p className="cta-description">
+            Upload your insurance policy now and get clarity in seconds.
+          </p>
+          <button className="primary-button" onClick={handleUploadClick}>
+            Upload Your Policy
+            <span className="button-icon">↑</span>
+          </button>
+        </div>
+      </section>
       
       {/* Footer */}
-      <footer className="homepage-footer">
+      <footer className="modern-footer">
         <div className="footer-content">
           <div className="footer-brand">
-            <div className="footer-brand-name">CoverScan</div>
+            <div className="footer-logo">CoverScan</div>
             <p className="footer-tagline">Making insurance transparent</p>
           </div>
           <div className="footer-links">
-            <div className="footer-links-column">
+            <div className="footer-column">
               <h4>Product</h4>
-              <button onClick={() => scrollToSection('benefits')}>Benefits</button>
-              <button onClick={() => scrollToSection('features')}>Features</button>
-              <button onClick={() => scrollToSection('insurance-types')}>Get Started</button>
+              <a href="#how-it-works">How It Works</a>
+              <a href="#features">Features</a>
             </div>
-            <div className="footer-links-column">
-              <h4>Company</h4>
-              <button onClick={() => scrollToSection('business-description')}>About</button>
-              <button>Privacy Policy</button>
-              <button>Terms of Service</button>
+            <div className="footer-column">
+              <h4>Legal</h4>
+              <a href="#">Privacy Policy</a>
+              <a href="#">Terms of Service</a>
             </div>
           </div>
         </div>

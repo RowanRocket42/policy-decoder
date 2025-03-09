@@ -3,7 +3,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css'; // Importing the CSS for this component
 import HomePage from './HomePage'; // Importing our HomePage component
-import InsuranceUpload from './InsuranceUpload'; // Importing our InsuranceUpload component
 import Chat from './Chat'; // Importing our Chat component
 
 /**
@@ -15,28 +14,18 @@ import Chat from './Chat'; // Importing our Chat component
  * 
  * Routes:
  * - / : HomePage component (insurance type selection)
- * - /upload/:insuranceType : InsuranceUpload component (PDF upload for specific insurance type)
  * - /chat/:policyId : Chat component (chat interface for asking questions about a policy)
  */
 function App() {
   return (
-    <Router>
-      <div className="App">
+    <div className="App">
+      <Router>
         <Routes>
-          {/* Home page route */}
           <Route path="/" element={<HomePage />} />
-          
-          {/* Insurance upload route with dynamic parameter for insurance type */}
-          <Route path="/upload/:insuranceType" element={<InsuranceUpload />} />
-          
-          {/* Chat route with dynamic parameter for policy ID */}
           <Route path="/chat/:policyId" element={<Chat />} />
-          
-          {/* Fallback route redirects to home */}
-          <Route path="*" element={<HomePage />} />
         </Routes>
-      </div>
-    </Router>
+      </Router>
+    </div>
   );
 }
 
