@@ -5,12 +5,13 @@ import './Chat.css'; // Import the CSS file
 /**
  * Chat Component
  * 
- * This component provides a ChatGPT-like interface for asking questions about PDF content.
+ * This component provides a Grok-like chat interface for asking questions about PDF content.
  * Features:
  * - Dark/light theme toggle with localStorage persistence
  * - Markdown support for AI responses
  * - Auto-expanding textarea for user input
  * - Animated message bubbles
+ * - Minimalist design with no headers
  * 
  * @param {Object} props - Component props
  * @param {string} props.pdfText - The text extracted from the PDF document
@@ -227,20 +228,15 @@ function Chat({ pdfText }) {
         {isDarkTheme ? '☀️' : '🌙'}
       </button>
       
-      {/* Chat header */}
-      <div className="chat-header">
-        <h2>Ask Questions About This Document</h2>
-      </div>
-      
-      {/* Display a message if no PDF text is provided */}
-      {!pdfText && (
-        <p className="no-pdf-message">
-          Please upload a PDF document first to ask questions about it.
-        </p>
-      )}
-      
-      {/* Messages container */}
+      {/* Messages container - centered vertically and horizontally */}
       <div className="messages-container">
+        {/* Display a message if no PDF text is provided */}
+        {!pdfText && (
+          <p className="no-pdf-message">
+            Please upload a PDF document first to ask questions about it.
+          </p>
+        )}
+        
         {/* Messages list */}
         <div className="messages-list">
           {messages.map((message, index) => (
@@ -248,11 +244,6 @@ function Chat({ pdfText }) {
               key={index} 
               className={`message ${message.type} ${message.isNew ? 'fade-in' : ''} ${message.isError ? 'error' : ''}`}
             >
-              {/* Hidden label for screen readers */}
-              <span className="message-label">
-                {message.type === 'question' ? 'You:' : 'AI:'}
-              </span>
-              
               {/* Message content - use ReactMarkdown for AI responses */}
               <div className="message-text">
                 {message.type === 'answer' ? (
@@ -267,7 +258,6 @@ function Chat({ pdfText }) {
           {/* Loading indicator */}
           {isLoading && (
             <div className="message answer loading fade-in">
-              <span className="message-label">AI:</span>
               <div className="message-text">
                 <div className="typing-indicator">
                   <span></span>
@@ -304,7 +294,7 @@ function Chat({ pdfText }) {
           className="chat-submit-button"
           aria-label="Send message"
         >
-          Send
+          ➡️
         </button>
       </div>
     </div>

@@ -16,6 +16,8 @@
   max-height: 600px;         /* Maximum height */
   position: relative;        /* For absolute positioning of children */
   overflow: hidden;          /* Prevent scrolling of container */
+  justify-content: center;   /* Center content vertically */
+  align-items: center;       /* Center content horizontally */
 }
 
 /* 
@@ -23,7 +25,7 @@
  * Applied when the dark-theme class is present
  */
 .chat-container.dark-theme {
-  background-color: #1e1e1e; /* Dark background */
+  background-color: #1e1e1e; /* Dark background as requested */
   color: #ffffff;            /* White text */
 }
 
@@ -44,8 +46,8 @@
   position: absolute;        /* Position relative to container */
   top: 10px;                 /* 10px from top */
   right: 10px;               /* 10px from right */
-  width: 30px;               /* Fixed width */
-  height: 30px;              /* Fixed height */
+  width: 30px;               /* Fixed width as requested */
+  height: 30px;              /* Fixed height as requested */
   border-radius: 50%;        /* Circular button */
   border: none;              /* No border */
   background: transparent;   /* Transparent background */
@@ -70,39 +72,17 @@
 }
 
 /* 
- * Header styles
- * Contains the title of the chat
- */
-.chat-header {
-  text-align: center;        /* Center the text */
-  padding-bottom: 15px;      /* Space below the header */
-  margin-bottom: 15px;       /* Space between header and content */
-  border-bottom: 1px solid #383850; /* Subtle divider */
-}
-
-/* Header title */
-.chat-header h2 {
-  font-size: 18px;           /* Smaller font size as requested */
-  font-weight: 500;          /* Medium weight for cleaner look */
-  margin: 0;                 /* Remove default margin */
-}
-
-/* Light theme header divider */
-.light-theme .chat-header {
-  border-bottom-color: #e0e0e0; /* Lighter divider for light theme */
-}
-
-/* 
  * Message when no PDF is uploaded
  * Displayed when pdfText is empty
  */
 .no-pdf-message {
-  background-color: #2d2d3a; /* Dark background */
+  background-color: #2a2a2a; /* Dark background */
   color: #ff9494;            /* Light red text */
   padding: 15px;             /* Space inside the message */
-  border-radius: 8px;        /* Rounded corners */
+  border-radius: 15px;       /* Rounded corners to match message bubbles */
   text-align: center;        /* Center the text */
   margin: 20px 0;            /* Vertical spacing */
+  max-width: 80%;            /* Limit width */
 }
 
 /* Light theme no-pdf message */
@@ -120,6 +100,8 @@
   display: flex;             /* Use flexbox */
   flex-direction: column;    /* Stack children vertically */
   justify-content: center;   /* Center vertically */
+  align-items: center;       /* Center horizontally */
+  width: 100%;               /* Full width of container */
   overflow: hidden;          /* Prevent container scrolling */
   margin-bottom: 10px;       /* Space before input area */
 }
@@ -135,6 +117,7 @@
   display: flex;             /* Use flexbox */
   flex-direction: column;    /* Stack messages vertically */
   gap: 15px;                 /* Space between messages */
+  width: 100%;               /* Full width of container */
   /* Custom scrollbar */
   scrollbar-width: thin;     /* Thin scrollbar for Firefox */
   scrollbar-color: #4a4a6a #2d2d3a; /* Scrollbar colors for Firefox */
@@ -175,40 +158,48 @@
  * Common styles for all message bubbles
  */
 .message {
-  max-width: 80%;            /* Limit width */
-  padding: 10px;             /* Space inside bubbles */
-  border-radius: 8px;        /* Rounded corners */
+  max-width: 70%;            /* Limit width to 70% as requested */
+  padding: 10px 15px;        /* Space inside bubbles as requested */
+  border-radius: 15px;       /* Rounded corners as requested */
   position: relative;        /* For positioning elements inside */
   word-wrap: break-word;     /* Wrap long words */
   line-height: 1.5;          /* Line spacing */
-  background-color: #4a4a4a; /* Grey background as requested */
-  color: #ffffff;            /* White text */
   opacity: 1;                /* Full opacity by default */
   transition: opacity 0.3s;  /* Smooth fade-in animation */
 }
 
-/* Light theme message */
-.light-theme .message {
-  background-color: #cccccc; /* Light grey for light theme */
-  color: #333333;            /* Dark text */
-}
-
 /* 
  * User question message style
- * Positioned on the right side
+ * Positioned on the right side with dark grey background
  */
 .message.question {
   align-self: flex-end;      /* Align to the right */
   margin-left: auto;         /* Push to the right */
+  background-color: #444;    /* Dark grey as requested */
+  color: #ffffff;            /* White text */
+}
+
+/* Light theme user message */
+.light-theme .message.question {
+  background-color: #cccccc; /* Light grey for light theme as requested */
+  color: #333333;            /* Dark text */
 }
 
 /* 
  * AI answer message style
- * Positioned on the left side
+ * Positioned on the left side with darker grey background
  */
 .message.answer {
   align-self: flex-start;    /* Align to the left */
   margin-right: auto;        /* Push to the left */
+  background-color: #2a2a2a; /* Darker grey as requested */
+  color: #ffffff;            /* White text */
+}
+
+/* Light theme AI message */
+.light-theme .message.answer {
+  background-color: #e0e0e0; /* Light grey for light theme as requested */
+  color: #333333;            /* Dark text */
 }
 
 /* 
@@ -229,12 +220,12 @@
  * Shown while waiting for a response
  */
 .message.loading {
-  background-color: #3d3d56; /* Slightly different background */
+  background-color: #2a2a2a; /* Same as AI messages */
 }
 
 .light-theme .message.loading {
-  background-color: #e9ecef; /* Light grey for light theme */
-  color: #495057;            /* Darker text */
+  background-color: #e0e0e0; /* Same as AI messages in light theme */
+  color: #333333;            /* Dark text */
 }
 
 /* 
@@ -242,7 +233,7 @@
  * Applied to messages with the fade-in class
  */
 .message.fade-in {
-  animation: fadeIn 0.3s ease-in; /* Fade in over 0.3 seconds */
+  animation: fadeIn 0.3s ease-in; /* Fade in over 0.3 seconds as requested */
 }
 
 /* Keyframes for fade-in animation */
@@ -271,7 +262,7 @@
 }
 
 .light-theme .typing-indicator span {
-  background-color: #495057; /* Dark dots for light theme */
+  background-color: #333333; /* Dark dots for light theme */
 }
 
 /* Delay each dot's animation */
@@ -291,19 +282,22 @@
  */
 .chat-input-container {
   display: flex;             /* Use flexbox */
-  gap: 10px;                 /* Space between elements */
-  padding: 10px;             /* Space inside container */
-  background-color: #2d2d3a; /* Darker background */
-  border-radius: 8px;        /* Rounded corners */
-  position: relative;        /* For positioning */
-  bottom: 0;                 /* Align to bottom */
-  left: 0;                   /* Align to left */
-  right: 0;                  /* Align to right */
+  align-items: center;       /* Center items vertically */
+  width: 100%;               /* Full width */
+  max-width: 800px;          /* Match container max-width */
+  position: relative;        /* For positioning the send button */
+  bottom: 20px;              /* Position from bottom as requested */
   margin-top: auto;          /* Push to bottom */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow as requested */
+  border-radius: 25px;       /* Rounded corners as requested */
+  background-color: #2a2a2a; /* Darker grey as requested */
+  padding: 0;                /* No padding on container */
+  overflow: hidden;          /* Hide overflow */
 }
 
 .light-theme .chat-input-container {
   background-color: #f0f0f0; /* Light grey for light theme */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Lighter shadow */
 }
 
 /* 
@@ -312,97 +306,82 @@
  */
 .chat-input {
   flex: 1;                   /* Take up available space */
-  padding: 12px 16px;        /* Space inside textarea */
+  padding: 10px 20px;        /* Space inside textarea as requested */
   border: none;              /* No border */
-  border-radius: 8px;        /* Rounded corners */
-  background-color: #333333; /* Dark grey as requested */
-  color: #ffffff;            /* White text */
+  background-color: transparent; /* Transparent background */
+  color: #cccccc;            /* Light grey text as requested */
   font-size: 16px;           /* Readable font size */
   outline: none;             /* No outline on focus */
   resize: none;              /* Disable manual resizing */
-  min-height: 40px;          /* Minimum height */
-  max-height: 120px;         /* Maximum height */
+  min-height: 40px;          /* Minimum height as requested */
+  max-height: 120px;         /* Maximum height as requested */
   font-family: inherit;      /* Use the same font as the rest of the app */
   line-height: 1.5;          /* Line spacing */
-  transition: background-color 0.3s; /* Smooth transition */
+  border-radius: 25px;       /* Rounded corners to match container */
 }
 
 .light-theme .chat-input {
-  background-color: #ffffff; /* White background for light theme */
-  color: #333333;            /* Dark text */
-  border: 1px solid #e0e0e0; /* Light border */
-}
-
-.chat-input:focus {
-  background-color: #3a3a3a; /* Slightly lighter when focused */
-}
-
-.light-theme .chat-input:focus {
-  background-color: #ffffff; /* Stay white when focused */
-  border-color: #b3d7ff;     /* Light blue border */
+  color: #333333;            /* Dark text for light theme */
 }
 
 .chat-input::placeholder {
-  color: #9e9eb3;            /* Light grey placeholder */
+  color: #777777;            /* Darker grey placeholder */
 }
 
 .light-theme .chat-input::placeholder {
-  color: #adb5bd;            /* Darker placeholder for light theme */
+  color: #aaaaaa;            /* Lighter placeholder for light theme */
 }
 
 .chat-input:disabled {
-  background-color: #2d2d3a; /* Darker when disabled */
-  color: #6c6c8b;            /* Lighter text when disabled */
+  color: #555555;            /* Darker text when disabled */
   cursor: not-allowed;       /* Not-allowed cursor */
 }
 
 .light-theme .chat-input:disabled {
-  background-color: #e9ecef; /* Light grey when disabled */
-  color: #adb5bd;            /* Grey text */
-  border-color: #e0e0e0;     /* Light border */
+  color: #aaaaaa;            /* Light grey text when disabled */
 }
 
 /* 
  * Send button
- * Used to submit questions
+ * Positioned inside the textarea on the right
  */
 .chat-submit-button {
-  padding: 12px 20px;        /* Space inside button */
-  background-color: #444444; /* Dark grey as requested */
-  color: white;              /* White text */
+  position: absolute;        /* Position absolutely */
+  right: 15px;               /* Position from right */
+  top: 50%;                  /* Center vertically */
+  transform: translateY(-50%); /* Center vertically */
+  background: transparent;   /* No background as requested */
+  color: #cccccc;            /* Light grey color as requested */
   border: none;              /* No border */
-  border-radius: 8px;        /* Rounded corners */
   cursor: pointer;           /* Hand cursor on hover */
-  font-weight: bold;         /* Bold text */
-  transition: background-color 0.3s; /* Smooth transition */
-  display: flex;             /* Use flexbox */
+  font-size: 16px;           /* Size for the arrow */
+  padding: 8px;              /* Space around the arrow */
+  display: flex;             /* Center the content */
   align-items: center;       /* Center vertically */
   justify-content: center;   /* Center horizontally */
-  min-width: 80px;           /* Minimum width */
+  transition: color 0.3s;    /* Smooth transition */
+  z-index: 2;                /* Above the textarea */
 }
 
 .light-theme .chat-submit-button {
-  background-color: #e0e0e0; /* Light grey for light theme */
-  color: #333333;            /* Dark text */
+  color: #555555;            /* Darker color for light theme */
 }
 
 .chat-submit-button:hover:not(:disabled) {
-  background-color: #555555; /* Lighter on hover as requested */
+  color: #ffffff;            /* White on hover */
 }
 
 .light-theme .chat-submit-button:hover:not(:disabled) {
-  background-color: #d0d0d0; /* Darker on hover for light theme */
+  color: #000000;            /* Black on hover for light theme */
 }
 
 .chat-submit-button:disabled {
-  background-color: #3d3d56; /* Darker when disabled */
-  color: #9e9eb3;            /* Lighter text */
+  color: #555555;            /* Darker when disabled */
   cursor: not-allowed;       /* Not-allowed cursor */
 }
 
 .light-theme .chat-submit-button:disabled {
-  background-color: #f8f9fa; /* Very light grey when disabled */
-  color: #adb5bd;            /* Grey text */
+  color: #cccccc;            /* Lighter when disabled for light theme */
 }
 
 /* 
@@ -473,50 +452,30 @@
 }
 
 /* 
- * Hide the message labels visually but keep them for screen readers
- * This is an accessibility feature
- */
-.message-label {
-  position: absolute;        /* Position absolutely */
-  width: 1px;                /* Nearly invisible */
-  height: 1px;               /* Nearly invisible */
-  padding: 0;                /* No padding */
-  margin: -1px;              /* Negative margin */
-  overflow: hidden;          /* Hide overflow */
-  clip: rect(0, 0, 0, 0);    /* Clip to nothing */
-  white-space: nowrap;       /* No wrapping */
-  border: 0;                 /* No border */
-}
-
-/* 
  * Responsive styles for smaller screens
  * Adjust layout for mobile devices
  */
 @media (max-width: 600px) {
   .chat-container {
-    max-width: 90%;          /* Use 90% of screen width */
-    padding: 15px;           /* Smaller padding */
+    max-width: 90%;          /* Use 90% of screen width as requested */
+    padding: 10px;           /* Smaller padding as requested */
   }
   
   .message {
-    max-width: 85%;          /* Wider messages */
+    max-width: 80%;          /* Wider messages on small screens */
   }
   
   .chat-input-container {
-    padding: 8px;            /* Smaller padding */
+    width: 90%;              /* Match container width */
   }
   
   .chat-input {
-    padding: 10px;           /* Smaller padding */
+    padding: 8px 15px;       /* Smaller padding */
     font-size: 14px;         /* Smaller font */
   }
   
   .chat-submit-button {
-    padding: 10px 15px;      /* Smaller padding */
-    min-width: 60px;         /* Smaller width */
-  }
-  
-  .chat-header h2 {
-    font-size: 16px;         /* Smaller header */
+    right: 10px;             /* Closer to edge */
+    padding: 6px;            /* Smaller padding */
   }
 } 
