@@ -27,6 +27,8 @@
   --spacing-lg: 32px;             /* Large spacing */
   --spacing-xl: 48px;             /* Extra large spacing */
   --transition-speed: 0.3s;       /* Smooth transitions */
+  --container-width: 90%;         /* Container width as percentage of viewport */
+  --container-max-width: 1400px;  /* Maximum container width */
 }
 
 /* 
@@ -43,6 +45,7 @@ html, body {
   overflow-y: auto; /* Explicitly allow vertical scrolling */
   height: auto; /* Allow content to determine height */
   min-height: 100%;
+  width: 100%;
 }
 
 /* 
@@ -52,6 +55,7 @@ html, body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: 100%;
   background: linear-gradient(135deg, #f0f4f8 0%, #e6f0ff 100%);
   overflow-y: auto; /* Allow scrolling within the container */
   position: relative; /* Ensure proper stacking context */
@@ -71,6 +75,7 @@ html, body {
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
 }
 
 /* 
@@ -149,6 +154,9 @@ html, body {
   position: relative;
   overflow: visible; /* Allow content to overflow for animations */
   transition: opacity 0.5s ease;
+  width: var(--container-width);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
 }
 
 .hero-section.active {
@@ -156,13 +164,13 @@ html, body {
 }
 
 .hero-content {
-  max-width: 600px;
+  max-width: 50%;
   z-index: 2;
 }
 
 .hero-image {
   position: relative;
-  width: 40%;
+  width: 45%;
   height: 400px;
   z-index: 1;
 }
@@ -266,6 +274,9 @@ section {
   transition: opacity 0.5s ease;
   scroll-margin-top: 80px;
   overflow: visible; /* Allow content to be visible */
+  width: var(--container-width);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
 }
 
 section.active {
@@ -313,7 +324,6 @@ section.active {
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: var(--spacing-lg);
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -365,7 +375,6 @@ section.active {
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: var(--spacing-lg);
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -417,7 +426,6 @@ section.active {
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: var(--spacing-lg);
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -467,7 +475,7 @@ section.active {
 }
 
 .business-content {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -486,7 +494,7 @@ section.active {
   border-radius: var(--border-radius);
   padding: var(--spacing-md);
   box-shadow: var(--shadow-light);
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto;
   backdrop-filter: blur(5px);
 }
@@ -518,7 +526,6 @@ section.active {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--spacing-md);
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -584,12 +591,14 @@ section.active {
   background-color: rgba(42, 125, 225, 0.05);
   backdrop-filter: blur(10px);
   padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+  width: 100%;
 }
 
 .footer-content {
   display: flex;
   justify-content: space-between;
-  max-width: 1200px;
+  width: var(--container-width);
+  max-width: var(--container-max-width);
   margin: 0 auto;
   padding-bottom: var(--spacing-lg);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
@@ -651,12 +660,19 @@ section.active {
   padding-top: var(--spacing-md);
   font-size: 14px;
   color: var(--text-medium);
+  width: var(--container-width);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
 }
 
 /* 
  * Responsive styles
  */
 @media (max-width: 1024px) {
+  :root {
+    --container-width: 95%;
+  }
+  
   .hero-section {
     flex-direction: column;
     text-align: center;
@@ -689,6 +705,10 @@ section.active {
 }
 
 @media (max-width: 768px) {
+  :root {
+    --container-width: 95%;
+  }
+  
   .top-nav {
     flex-direction: column;
     padding: var(--spacing-sm);
@@ -737,6 +757,16 @@ section.active {
 }
 
 @media (max-width: 480px) {
+  :root {
+    --container-width: 100%;
+    --spacing-lg: 24px;
+    --spacing-md: 16px;
+  }
+  
+  section {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+  
   .brand-title {
     font-size: 36px;
   }
