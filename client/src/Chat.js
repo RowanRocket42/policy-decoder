@@ -1,131 +1,203 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
-import './Chat.css'; // Import the new CSS file
+import ReactMarkdown from 'react-markdown'; // Import ReactMarkdown for rendering markdown
+import './Chat.css'; // Import the CSS file
 
 /**
  * Chat Component
  * 
- * This component provides a chat interface for asking questions about the PDF content.
- * It displays a list of messages (questions and answers) and a text input for new questions.
+ * This component provides a ChatGPT-like interface for asking questions about PDF content.
+ * Features:
+ * - Dark/light theme toggle with localStorage persistence
+ * - Markdown support for AI responses
+ * - Auto-expanding textarea for user input
+ * - Animated message bubbles
  * 
  * @param {Object} props - Component props
  * @param {string} props.pdfText - The text extracted from the PDF document
  */
 function Chat({ pdfText }) {
-  // useState is a React Hook that lets you add state to functional components
-  // Here we're creating three state variables:
-  // 1. messages - to store the list of chat messages (questions and answers)
-  // 2. newQuestion - to store the current text in the input field
-  // 3. isLoading - to track when we're waiting for a response from the server
+  // ===== STATE MANAGEMENT =====
+  // Store chat messages (questions and answers)
   const [messages, setMessages] = useState([]);
+  
+  // Store the current question being typed
   const [newQuestion, setNewQuestion] = useState('');
+  
+  // Track if we're waiting for a response
   const [isLoading, setIsLoading] = useState(false);
   
-  // Create a ref for the messages container to scroll to bottom
+  // Track the current theme (dark or light)
+  // We initialize it from localStorage if available, otherwise default to dark
+  const [isDarkTheme, setIsDarkTheme] = useState(() => {
+    // Try to get the theme from localStorage
+    const savedTheme = localStorage.getItem('chatTheme');
+    // Return true for dark theme if no saved preference or it was explicitly set to 'dark'
+    return savedTheme === null ? true : savedTheme === 'dark';
+  });
+  
+  // ===== REFS =====
+  // Reference to the messages container for scrolling
   const messagesEndRef = useRef(null);
+  
+  // Reference to the textarea for auto-expanding
+  const textareaRef = useRef(null);
+  
+  // ===== EFFECTS =====
+  // Effect to scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
+  
+  // Effect to save theme preference to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('chatTheme', isDarkTheme ? 'dark' : 'light');
+    // Add or remove a class from the body to affect global styles if needed
+    if (isDarkTheme) {
+      document.body.classList.add('dark-theme');
+      document.body.classList.remove('light-theme');
+    } else {
+      document.body.classList.add('light-theme');
+      document.body.classList.remove('dark-theme');
+    }
+  }, [isDarkTheme]);
+  
+  // Effect to auto-resize the textarea as content changes
+  useEffect(() => {
+    if (textareaRef.current) {
+      // Reset height to auto to get the correct scrollHeight
+      textareaRef.current.style.height = 'auto';
+      // Set the height to the scrollHeight to fit the content
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [newQuestion]);
 
-  // Function to scroll to the bottom of the messages list
+  /**
+   * scrollToBottom
+   * 
+   * Scrolls the message container to the bottom to show the latest message.
+   * Uses the messagesEndRef to find the bottom element.
+   */
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // useEffect hook to scroll to bottom when messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, isLoading]);
-
   /**
    * handleInputChange
    * 
-   * This function is called whenever the user types in the input field.
-   * It updates the newQuestion state with the current input value.
+   * Updates the newQuestion state as the user types.
+   * The textarea will auto-resize based on content through the useEffect hook.
    * 
-   * @param {Event} event - The change event from the input field
+   * @param {Event} event - The change event from the textarea
    */
   const handleInputChange = (event) => {
-    // Update the newQuestion state with the current value of the input field
     setNewQuestion(event.target.value);
   };
 
   /**
    * handleKeyPress
    * 
-   * This function is called when a key is pressed in the input field.
-   * If the Enter key is pressed, it submits the question.
+   * Handles keyboard shortcuts:
+   * - Enter (without Shift) submits the question
+   * - Shift+Enter adds a new line
    * 
-   * @param {Event} event - The keypress event from the input field
+   * @param {Event} event - The keypress event from the textarea
    */
   const handleKeyPress = (event) => {
-    // Check if the pressed key is Enter
-    if (event.key === 'Enter') {
-      // Prevent the default action (form submission/line break)
+    // Check if Enter was pressed without Shift key
+    if (event.key === 'Enter' && !event.shiftKey) {
+      // Prevent the default action (new line)
       event.preventDefault();
-      // Call the function to handle the question submission
+      // Submit the question
       handleSubmitQuestion();
     }
   };
 
   /**
+   * toggleTheme
+   * 
+   * Toggles between dark and light themes.
+   * The theme preference is saved to localStorage through the useEffect hook.
+   */
+  const toggleTheme = () => {
+    setIsDarkTheme(prevTheme => !prevTheme);
+  };
+
+  /**
    * handleSubmitQuestion
    * 
-   * This function is called when a question is submitted.
-   * It sends the question and PDF text to the server and adds the response to the messages.
+   * Processes the user's question:
+   * 1. Adds the question to the messages
+   * 2. Sends the question to the server
+   * 3. Adds the AI's response to the messages
    */
   const handleSubmitQuestion = async () => {
-    // Check if the question is empty (or just whitespace)
+    // Don't submit if the question is empty or just whitespace
     if (!newQuestion.trim()) {
-      return; // Don't submit empty questions
+      return;
     }
 
     try {
-      // Add the user's question to the messages list
+      // Get the trimmed question
       const userQuestion = newQuestion.trim();
       
-      // Update the messages state by creating a new array that includes all existing messages
-      // plus the new user question. This is the immutable way to update state in React.
+      // Add the user's question to the messages
+      // The 'fade-in' class triggers the animation
       setMessages([
         ...messages, 
-        { type: 'question', text: userQuestion }
+        { type: 'question', text: userQuestion, isNew: true }
       ]);
       
       // Clear the input field
       setNewQuestion('');
       
-      // Set loading state to true to show a loading indicator
+      // Show loading indicator
       setIsLoading(true);
 
-      // For very large PDFs, we'll truncate the text on the client side
-      // to reduce the request size and improve performance
-      // The server will further truncate if needed
-      const maxTextLength = 100000; // 100KB limit for the request
+      // Truncate PDF text if it's too large to avoid request size limits
+      const maxTextLength = 100000;
       const truncatedPdfText = pdfText.length > maxTextLength 
         ? pdfText.substring(0, maxTextLength) 
         : pdfText;
 
-      // Use axios to send a POST request to the server
-      // axios is a popular HTTP client for making requests to servers
-      // We're using the async/await syntax to handle the asynchronous request
-      const response = await axios.post('http://localhost:3002/chat', {
-        question: userQuestion,
-        pdfText: truncatedPdfText
+      // Send the question to the server
+      const response = await fetch('http://localhost:3002/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question: userQuestion,
+          pdfText: truncatedPdfText
+        }),
       });
 
-      // Extract the answer from the response
-      const answer = response.data.answer;
-
-      // Add the answer to the messages list
+      // Parse the response
+      const data = await response.json();
+      
+      // Add the AI's answer to the messages
+      // The 'fade-in' class triggers the animation
       setMessages(prevMessages => [
         ...prevMessages,
-        { type: 'answer', text: answer }
+        { type: 'answer', text: data.answer, isNew: true }
       ]);
+      
+      // After a short delay, remove the 'isNew' flag to stop the animation
+      setTimeout(() => {
+        setMessages(prevMessages => 
+          prevMessages.map((msg, idx) => 
+            idx === prevMessages.length - 1 || idx === prevMessages.length - 2
+              ? { ...msg, isNew: false }
+              : msg
+          )
+        );
+      }, 500);
+      
     } catch (error) {
-      // Handle any errors that occur during the request
       console.error('Error getting answer:', error);
       
-      // Create a more detailed error message
+      // Create a detailed error message
       let errorMessage = 'Sorry, there was an error processing your question. Please try again.';
       
-      // If we have response data with more details, include it
       if (error.response && error.response.data) {
         console.error('Server error details:', error.response.data);
         if (error.response.data.message) {
@@ -136,17 +208,26 @@ function Chat({ pdfText }) {
       // Add the error message to the chat
       setMessages(prevMessages => [
         ...prevMessages,
-        { type: 'answer', text: errorMessage }
+        { type: 'answer', text: errorMessage, isNew: true, isError: true }
       ]);
     } finally {
-      // Set loading state back to false when the request is complete (whether it succeeded or failed)
+      // Hide loading indicator
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="chat-container">
-      {/* Chat header with title */}
+    <div className={`chat-container ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}>
+      {/* Theme toggle button */}
+      <button 
+        className="theme-toggle" 
+        onClick={toggleTheme} 
+        aria-label={isDarkTheme ? 'Switch to light theme' : 'Switch to dark theme'}
+      >
+        {isDarkTheme ? '☀️' : '🌙'}
+      </button>
+      
+      {/* Chat header */}
       <div className="chat-header">
         <h2>Ask Questions About This Document</h2>
       </div>
@@ -158,49 +239,62 @@ function Chat({ pdfText }) {
         </p>
       )}
       
-      {/* The messages list - this is where all the chat bubbles appear */}
-      <div className="messages-list">
-        {/* Map through each message and create a chat bubble */}
-        {messages.map((message, index) => (
-          <div 
-            key={index} 
-            className={`message ${message.type}`}
-          >
-            {/* Hidden label for screen readers */}
-            <span className="message-label">
-              {message.type === 'question' ? 'You:' : 'AI:'}
-            </span>
-            
-            {/* The actual message text */}
-            <div className="message-text">
-              {message.text}
+      {/* Messages container */}
+      <div className="messages-container">
+        {/* Messages list */}
+        <div className="messages-list">
+          {messages.map((message, index) => (
+            <div 
+              key={index} 
+              className={`message ${message.type} ${message.isNew ? 'fade-in' : ''} ${message.isError ? 'error' : ''}`}
+            >
+              {/* Hidden label for screen readers */}
+              <span className="message-label">
+                {message.type === 'question' ? 'You:' : 'AI:'}
+              </span>
+              
+              {/* Message content - use ReactMarkdown for AI responses */}
+              <div className="message-text">
+                {message.type === 'answer' ? (
+                  <ReactMarkdown>{message.text}</ReactMarkdown>
+                ) : (
+                  message.text
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-        
-        {/* Show a loading indicator when waiting for a response */}
-        {isLoading && (
-          <div className="message answer loading">
-            <span className="message-label">AI:</span>
-            <div className="message-text">Thinking...</div>
-          </div>
-        )}
-        
-        {/* Invisible element to scroll to */}
-        <div ref={messagesEndRef} />
+          ))}
+          
+          {/* Loading indicator */}
+          {isLoading && (
+            <div className="message answer loading fade-in">
+              <span className="message-label">AI:</span>
+              <div className="message-text">
+                <div className="typing-indicator">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Invisible element to scroll to */}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
       
-      {/* The input area for new questions */}
+      {/* Input area */}
       <div className="chat-input-container">
-        {/* Text input field */}
-        <input
-          type="text"
+        {/* Auto-expanding textarea */}
+        <textarea
+          ref={textareaRef}
           value={newQuestion}
           onChange={handleInputChange}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyPress}
           placeholder="Ask a question about the document..."
           disabled={!pdfText || isLoading}
           className="chat-input"
+          rows="1"
         />
         
         {/* Send button */}
@@ -208,6 +302,7 @@ function Chat({ pdfText }) {
           onClick={handleSubmitQuestion}
           disabled={!pdfText || !newQuestion.trim() || isLoading}
           className="chat-submit-button"
+          aria-label="Send message"
         >
           Send
         </button>
