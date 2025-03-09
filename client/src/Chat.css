@@ -7,24 +7,24 @@
  * Root variables
  */
 :root {
-  --primary-color: #3a86ff;       /* Vibrant blue */
-  --primary-dark: #2667cc;        /* Darker blue for hover states */
-  --primary-light: #e0ebff;       /* Light blue for backgrounds */
+  --primary-color: #00A86B;       /* Jade Green */
+  --primary-dark: #008755;        /* Darker Jade Green for hover states */
+  --primary-light: #E0F5EE;       /* Light Jade Green for backgrounds */
   --accent-color: #ff6b6b;        /* Accent color for highlights */
   --success-color: #4caf50;       /* Green for success states */
   --warning-color: #ff9800;       /* Orange for warnings */
-  --text-dark: #1a1a1a;           /* Near black for primary text */
-  --text-medium: #4a4a4a;         /* Dark gray for secondary text */
-  --text-light: #767676;          /* Medium gray for tertiary text */
-  --background-color: #ffffff;    /* White background */
-  --background-alt: #f8f9fa;      /* Light gray alternative background */
-  --card-background: #ffffff;     /* White card background */
-  --chat-bg: #f5f7fb;             /* Light blue-gray for chat background */
-  --user-bubble: #3a86ff;         /* User message bubble color */
-  --ai-bubble: #f0f2f5;           /* AI message bubble color */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08); /* Medium shadow */
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12); /* Large shadow */
+  --text-dark: #e4e4e4;           /* Light gray for primary text in dark mode */
+  --text-medium: #b0b0b0;         /* Medium gray for secondary text in dark mode */
+  --text-light: #8a8a8a;          /* Dark gray for tertiary text in dark mode */
+  --background-color: #121212;    /* Dark background */
+  --background-alt: #121212;      /* Same as background color for consistency */
+  --card-background: #121212;     /* Same as background color for consistency */
+  --chat-bg: #121212;             /* Same as background color for consistency */
+  --user-bubble: #00A86B;         /* User message bubble color - Jade Green */
+  --ai-bubble: #1e1e2e;           /* AI message bubble color in dark mode */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for dark mode */
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25); /* Medium shadow for dark mode */
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3); /* Large shadow for dark mode */
   --border-radius-sm: 8px;        /* Small border radius */
   --border-radius-md: 12px;       /* Medium border radius */
   --border-radius-lg: 20px;       /* Large border radius */
@@ -49,7 +49,7 @@
   flex-direction: column;
   height: 100vh; /* Fixed height to viewport height */
   overflow: hidden; /* Prevent scrolling of the page container */
-  background-color: var(--background-color);
+  background-color: #121212;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -65,9 +65,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 var(--spacing-lg);
-  height: 50px; /* Reduced from 70px */
-  background-color: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(10px);
+  height: var(--header-height);
+  background-color: #121212;
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
@@ -285,7 +284,7 @@
   width: 100%;
   max-width: 100%; /* Ensure it takes full width */
   margin: 0;
-  background-color: transparent;
+  background-color: #121212;
   color: var(--text-dark);
   display: flex;
   flex-direction: column;
@@ -311,6 +310,7 @@
   align-items: stretch;
   box-sizing: border-box;
   margin-bottom: 0;
+  background-color: #121212;
 }
 
 /* 
@@ -326,9 +326,10 @@
   width: 100%;
   max-width: 100%;
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.2) #121212;
   box-sizing: border-box;
   padding-bottom: 50px; /* Reduced padding at the bottom */
+  background-color: #121212;
 }
 
 /* 
@@ -339,13 +340,13 @@
 }
 
 .messages-list::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: var(--border-radius-full);
+  background-color: #121212;
+  border-radius: 3px;
 }
 
 .messages-list::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: var(--border-radius-full);
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
 }
 
 /* 
@@ -421,38 +422,42 @@
 }
 
 .message-text code {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 0, 0, 0.3);
   padding: 3px 6px; /* Increased padding */
   border-radius: 4px;
   font-family: monospace;
   font-size: 0.9em;
+  color: #e4e4e4;
 }
 
 .message-text pre {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 0, 0, 0.3);
   padding: var(--spacing-md); /* Increased padding */
   border-radius: var(--border-radius-sm);
   overflow-x: auto;
   margin: var(--spacing-md) 0; /* Increased margin */
+  color: #e4e4e4;
 }
 
 .message-text pre code {
   background-color: transparent;
   padding: 0;
   font-size: 0.95em; /* Slightly larger code blocks */
+  color: #e4e4e4;
 }
 
 .message-text ul, .message-text ol {
-  margin: var(--spacing-md) 0; /* Increased margin */
-  padding-left: var(--spacing-lg);
+  margin: var(--spacing-xs) 0 var(--spacing-xs) var(--spacing-md);
+  padding-left: var(--spacing-md);
 }
 
 /* 
  * Error message style
  */
 .message.error {
-  background-color: rgba(255, 107, 107, 0.1);
+  background-color: rgba(255, 107, 107, 0.2);
   border-left: 3px solid var(--accent-color);
+  color: #e4e4e4;
 }
 
 /* 
@@ -524,8 +529,8 @@
   padding: var(--spacing-md) var(--spacing-lg);
   width: 70%;
   max-width: 900px;
-  background-color: white;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: #1e1e2e;
+  border: 1px solid #383850;
   border-radius: var(--border-radius-full);
   position: fixed;
   bottom: 15px; /* Moved up slightly */
@@ -554,6 +559,7 @@
   background-color: transparent;
   width: 100%;
   box-sizing: border-box;
+  color: #e4e4e4;
 }
 
 .chat-input:focus {
@@ -610,47 +616,45 @@
  */
 @media (max-width: 768px) {
   .policy-info {
+    padding: var(--spacing-md);
     flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
   }
   
   .policy-summary {
-    grid-template-columns: 1fr;
+    width: 100%;
   }
   
   .message {
-    max-width: 92%;
-    font-size: 16px;
+    max-width: 90%;
     padding: 12px 16px;
   }
   
   .message-text {
-    font-size: 16px;
+    font-size: 15px;
   }
   
   .chat-container {
-    height: calc(100vh - 45px);
+    height: calc(100vh - 40px);
   }
   
   .chat-view-container {
-    height: 100vh;
-    padding: 0 8px;
+    padding: var(--spacing-sm);
   }
   
   .messages-container {
-    padding: 5px 0 calc(var(--spacing-sm) + 50px) 0;
+    padding-bottom: 80px;
   }
   
   .messages-list {
-    padding-bottom: 45px;
-    gap: 8px;
+    padding: var(--spacing-sm);
   }
   
   .chat-input-container {
     width: 80%;
     bottom: 10px;
     padding: var(--spacing-sm) var(--spacing-md);
+    background-color: #1e1e2e;
+    border: 1px solid #383850;
   }
 }
 
@@ -678,11 +682,15 @@
     width: 90%;
     padding: var(--spacing-sm);
     bottom: 8px;
+    background-color: #1e1e2e;
+    border: 1px solid #383850;
   }
   
   .chat-input {
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: 15px;
+    color: #e4e4e4;
+    background-color: transparent;
   }
   
   .chat-container {
@@ -710,33 +718,19 @@
  */
 .empty-chat-message {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   height: 100%;
-  color: var(--text-light);
-  font-style: italic;
+  padding: var(--spacing-lg);
   text-align: center;
-  padding: var(--spacing-md);
-  margin-bottom: 50px; /* Reduced to match the new spacing */
+  color: var(--text-medium);
+  background-color: #121212;
 }
 
 .empty-chat-message p {
-  background-color: var(--background-alt);
-  padding: var(--spacing-md);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-sm);
-  max-width: 70%;
-  animation: fadeIn 0.5s ease-in-out;
-  font-size: 15px;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  margin: var(--spacing-sm) 0;
+  font-size: 16px;
+  max-width: 500px;
+  line-height: 1.6;
 } 

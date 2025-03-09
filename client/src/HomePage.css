@@ -7,21 +7,21 @@
  * Global styles and variables
  */
 :root {
-  --primary-color: #3a86ff;       /* Vibrant blue */
-  --primary-dark: #2667cc;        /* Darker blue for hover states */
-  --primary-light: #e0ebff;       /* Light blue for backgrounds */
+  --primary-color: #00A86B;       /* Jade Green */
+  --primary-dark: #008755;        /* Darker Jade Green for hover states */
+  --primary-light: #E0F5EE;       /* Light Jade Green for backgrounds */
   --accent-color: #ff6b6b;        /* Accent color for highlights */
   --success-color: #4caf50;       /* Green for success states */
   --warning-color: #ff9800;       /* Orange for warnings */
-  --text-dark: #1a1a1a;           /* Near black for primary text */
-  --text-medium: #4a4a4a;         /* Dark gray for secondary text */
-  --text-light: #767676;          /* Medium gray for tertiary text */
-  --background-color: #ffffff;    /* White background */
-  --background-alt: #f8f9fa;      /* Light gray alternative background */
-  --card-background: #ffffff;     /* White card background */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08); /* Medium shadow */
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12); /* Large shadow */
+  --text-dark: #e4e4e4;           /* Light gray for primary text in dark mode */
+  --text-medium: #b0b0b0;         /* Medium gray for secondary text in dark mode */
+  --text-light: #8a8a8a;          /* Dark gray for tertiary text in dark mode */
+  --background-color: #121212;    /* Dark background */
+  --background-alt: #121212;      /* Same as background color for consistency */
+  --card-background: #1e1e2e;     /* Dark card background */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for dark mode */
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25); /* Medium shadow for dark mode */
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3); /* Large shadow for dark mode */
   --border-radius-sm: 8px;        /* Small border radius */
   --border-radius-md: 12px;       /* Medium border radius */
   --border-radius-lg: 20px;       /* Large border radius */
@@ -80,8 +80,7 @@ html, body {
   align-items: center;
   padding: 0 var(--spacing-lg);
   height: var(--header-height);
-  background-color: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(10px);
+  background-color: #121212;
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
@@ -146,23 +145,27 @@ html, body {
  * Hero section
  */
 .hero-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: var(--spacing-xxl) var(--spacing-lg);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   min-height: calc(100vh - var(--header-height));
   position: relative;
-  width: var(--container-width);
-  max-width: var(--container-max-width);
-  margin: 0 auto;
 }
 
 /* 
  * Hero content
  */
 .hero-content {
-  max-width: 50%;
+  max-width: 700px;
+  text-align: center;
   z-index: 2;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 /* 
@@ -172,9 +175,11 @@ html, body {
   font-size: 48px;
   font-weight: 700;
   color: var(--text-dark);
-  margin: 0 0 var(--spacing-md);
+  margin: 0 auto var(--spacing-md);
   line-height: 1.2;
   letter-spacing: -0.5px;
+  text-align: center;
+  width: 100%;
 }
 
 /* 
@@ -184,8 +189,10 @@ html, body {
   font-size: 18px;
   font-weight: 400;
   color: var(--text-medium);
-  margin: 0 0 var(--spacing-lg);
-  max-width: 500px;
+  margin: 0 auto var(--spacing-lg);
+  max-width: 600px;
+  text-align: center;
+  width: 100%;
 }
 
 /* 
@@ -194,7 +201,7 @@ html, body {
 .hero-cta {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--spacing-sm);
 }
 
@@ -214,7 +221,9 @@ html, body {
   box-shadow: var(--shadow-md);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-xs);
+  margin: 0 auto;
 }
 
 .primary-button:hover {
@@ -360,7 +369,7 @@ html, body {
  */
 .how-it-works-section {
   padding: var(--spacing-xxl) var(--spacing-lg);
-  background-color: var(--background-alt);
+  background-color: #121212;
   width: 100%;
 }
 
@@ -457,6 +466,7 @@ html, body {
  */
 .features-section {
   padding: var(--spacing-xxl) var(--spacing-lg);
+  background-color: #121212;
   width: 100%;
 }
 
@@ -524,7 +534,7 @@ html, body {
  */
 .cta-section {
   padding: var(--spacing-xxl) var(--spacing-lg);
-  background-color: var(--primary-light);
+  background-color: #121212;
   width: 100%;
   text-align: center;
 }
@@ -561,7 +571,7 @@ html, body {
  * Modern footer
  */
 .modern-footer {
-  background-color: var(--background-alt);
+  background-color: #121212;
   padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-md);
   width: 100%;
 }
@@ -674,13 +684,16 @@ html, body {
     text-align: center;
     padding: var(--spacing-xl) var(--spacing-md);
     gap: var(--spacing-xl);
+    width: 100%;
   }
   
   .hero-content {
     max-width: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin: 0 auto;
   }
   
   .hero-description {
@@ -788,14 +801,19 @@ html, body {
   
   .hero-section {
     padding: var(--spacing-lg) var(--spacing-sm);
+    width: 100%;
   }
   
   .hero-title {
     font-size: 28px;
+    width: 100%;
+    text-align: center;
   }
   
   .hero-description {
     font-size: 16px;
+    width: 100%;
+    text-align: center;
   }
   
   .primary-button {

@@ -181,15 +181,16 @@ function InsuranceUpload() {
       // Log the response data for debugging
       console.log('Server response:', data);
       
-      // In a real implementation, the server would return the analyzed policy data
-      // For now, we'll use mock data based on the insurance type
-      const mockPolicyData = getMockPolicyData(insuranceType, fileToUpload.name);
-      
-      // Update the policy data state
-      setPolicyData(mockPolicyData);
-      
-      // Set isAnalyzed to true to show the policy summary
-      setIsAnalyzed(true);
+      // Check if the response was successful
+      if (data.status === 'success' && data.policyData) {
+        // Use the real policy data from the server
+        setPolicyData(data.policyData);
+        setIsAnalyzed(true);
+      } else {
+        // Handle error case
+        setMessage('Error analyzing policy. Please try again.');
+        console.error('Server returned error or invalid data:', data);
+      }
     } catch (error) {
       // Handle any errors that occur during the fetch operation
       console.error('Error uploading file:', error);

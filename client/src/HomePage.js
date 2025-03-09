@@ -113,23 +113,6 @@ function HomePage() {
             )}
           </div>
         </div>
-        <div className="hero-image">
-          <div className="device-mockup">
-            <div className="device-screen">
-              <div className="mockup-content">
-                <div className="mockup-message ai">
-                  <p>Your policy covers emergency room visits with a $250 deductible.</p>
-                </div>
-                <div className="mockup-message user">
-                  <p>What about specialist visits?</p>
-                </div>
-                <div className="mockup-message ai">
-                  <p>Specialist visits are covered at 80% after you meet your annual deductible of $1,000.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
       
       {/* How It Works Section */}

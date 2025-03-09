@@ -9,8 +9,8 @@
 
 /* Set up the body with dark theme */
 body {
-  background-color: #1e1e1e;
-  color: #ffffff;
+  background-color: #121212;
+  color: #e4e4e4;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -28,6 +28,7 @@ body {
   justify-content: center;
   align-items: center;
   overflow-y: auto; /* Allow vertical scrolling */
+  background-color: #121212;
 }
 
 /* Styling for the main App container */
@@ -41,14 +42,13 @@ body {
 
 /* Styling for the App header section */
 .App-header {
-  background-color: #282c34;
+  background-color: #121212;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
 }
 
 /* Styling for links within the App */
@@ -81,9 +81,9 @@ button:hover {
   max-width: 800px;
   margin: 2rem auto;
   padding: 2rem;
-  background-color: #f8f9fa;
+  background-color: #121212;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .file-input-container {
@@ -106,20 +106,24 @@ button:hover {
 
 .extracted-text-container {
   margin-top: 2rem;
-  border-top: 1px solid #dee2e6;
+  border-top: 1px solid #383850;
   padding-top: 1rem;
+  background-color: #121212;
+  border-color: #383850;
 }
 
 .extracted-text {
-  max-height: 400px;
+  max-height: 300px;
   overflow-y: auto;
   padding: 1rem;
-  background-color: #fff;
-  border: 1px solid #dee2e6;
+  background-color: #121212;
+  border: 1px solid #383850;
   border-radius: 4px;
   font-family: monospace;
   white-space: pre-wrap;
   line-height: 1.5;
+  color: #e4e4e4;
+  border-color: #383850;
 }
 
 button {
@@ -158,10 +162,11 @@ button:disabled {
 
 .no-pdf-message {
   padding: 1rem;
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: rgba(255, 107, 107, 0.2);
+  color: #e4e4e4;
   border-radius: 4px;
   margin-bottom: 1rem;
+  border-left: 3px solid #ff6b6b;
 }
 
 .messages-list {
@@ -170,8 +175,8 @@ button:disabled {
   overflow-y: auto;
   margin-bottom: 1rem;
   padding: 1rem;
-  background-color: #fff;
-  border: 1px solid #dee2e6;
+  background-color: #121212;
+  border: 1px solid #383850;
   border-radius: 4px;
 }
 
@@ -184,13 +189,15 @@ button:disabled {
 }
 
 .message.question {
-  background-color: #e9ecef;
+  background-color: #00A86B;
   align-self: flex-end;
+  color: white;
 }
 
 .message.answer {
-  background-color: #e3f2fd;
+  background-color: #1e1e2e;
   align-self: flex-start;
+  color: #e4e4e4;
 }
 
 .message.loading {
@@ -200,25 +207,29 @@ button:disabled {
 .message-label {
   font-weight: bold;
   margin-bottom: 0.25rem;
+  color: #e4e4e4;
 }
 
 .message-text {
   white-space: pre-wrap;
-  line-height: 1.5;
+  color: inherit;
 }
 
 .chat-input-container {
   display: flex;
   gap: 0.5rem;
   width: 100%;
+  background-color: #121212;
 }
 
 .chat-input {
   flex: 1;
   padding: 0.75rem;
-  border: 1px solid #ced4da;
+  border: 1px solid #383850;
   border-radius: 4px;
   font-size: 1rem;
+  background-color: #1e1e2e;
+  color: #e4e4e4;
 }
 
 .chat-submit-button {
@@ -243,13 +254,36 @@ button:disabled {
 /* Chat section in Upload component */
 .chat-section {
   margin-top: 2rem;
-  border-top: 2px solid #dee2e6;
+  border-top: 1px solid #383850;
   padding-top: 1.5rem;
   margin-bottom: 0;
+  border-color: #383850;
+  background-color: #121212;
 }
 
-/* Dark mode styles for better integration with Chat component */
-@media (prefers-color-scheme: dark) {
+/* Dark theme styles applied by default */
+.upload-container {
+  background-color: #121212;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.extracted-text-container {
+  background-color: #121212;
+  border-color: #383850;
+}
+
+.extracted-text {
+  background-color: #121212;
+  color: #e4e4e4;
+  border-color: #383850;
+}
+
+.chat-section {
+  border-color: #383850;
+}
+
+/* Remove the media query since dark mode is now the default */
+/* @media (prefers-color-scheme: dark) {
   body {
     background-color: #121212;
     color: #e4e4e4;
@@ -282,4 +316,4 @@ button:disabled {
   .chat-section {
     border-color: #383850;
   }
-} 
+} */ 

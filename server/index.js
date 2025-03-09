@@ -88,6 +88,10 @@ const upload = multer({
   }
 });
 
+// In-memory storage for policy data
+// In a production environment, this would be replaced with a database
+const policyStorage = {};
+
 // Define a route for the root path
 app.get('/', (req, res) => {
   res.send('Policy Decoder API is running!');
@@ -107,18 +111,84 @@ app.post('/analyze', upload.single('file'), async (req, res) => {
     console.log('Saved as:', req.file.filename);
     console.log('Size:', req.file.size, 'bytes');
 
+    // Get the insurance type from the request body
+    const insuranceType = req.body.insuranceType;
+    if (!insuranceType) {
+      return res.status(400).json({ status: 'error', message: 'Insurance type is required' });
+    }
+
     // Use our PDF parser to extract text from the uploaded file
-    // This is an asynchronous operation, so we use await to wait for it to complete
     const extractedText = await parsePDF(req.file.path);
     
-    // Log a sample of the extracted text (first 100 characters)
+    // Log a sample of the extracted text
     console.log('Extracted text sample:', extractedText.substring(0, 100) + '...');
 
-    // Return the extracted text in the response
-    // Note: The parsePDF function already deletes the file after processing
+    // Create a prompt for OpenAI to analyze the policy
+    const maxPdfTextLength = 8000;
+    const truncatedPdfText = extractedText.substring(0, maxPdfTextLength);
+    
+    const prompt = `
+      I have the following text extracted from a ${insuranceType} insurance policy PDF document:
+      
+      ${truncatedPdfText}
+      
+      ${extractedText.length > maxPdfTextLength ? '... [text truncated due to length] ...' : ''}
+      
+      Please analyze this policy and extract the following information in JSON format:
+      1. name: The name of the policy (use the filename if not found in text: ${req.file.originalname})
+      2. type: The type of insurance (${insuranceType})
+      3. covered: An array of 5-7 key things that are covered by this policy
+      4. notCovered: An array of 5-7 key exclusions or things not covered
+      5. limits: An array of 5-7 key limits, deductibles, or conditions
+      6. contact: An object with phone, email, and website (if found in the document, otherwise use placeholder values)
+      
+      Return ONLY the JSON object without any additional text or explanation.
+    `;
+
+    console.log('Sending policy text to OpenAI for analysis...');
+    
+    // Call the OpenAI API to analyze the policy
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        { 
+          role: 'system', 
+          content: 'You are an AI assistant that specializes in analyzing insurance policies. Extract structured data from policy documents in the exact JSON format requested.' 
+        },
+        { role: 'user', content: prompt }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.5,
+    });
+
+    // Extract the policy data from the OpenAI response
+    let policyData;
+    try {
+      // Parse the JSON response
+      const responseContent = completion.choices[0].message.content;
+      policyData = JSON.parse(responseContent);
+      
+      // Add an ID to the policy data
+      policyData.id = `${insuranceType}-${Date.now()}`;
+      
+      // Store the policy data in memory
+      policyStorage[policyData.id] = policyData;
+      
+      console.log('Successfully analyzed policy:', policyData.name);
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+      return res.status(500).json({ 
+        status: 'error', 
+        message: 'Failed to parse policy data',
+        rawResponse: completion.choices[0].message.content
+      });
+    }
+
+    // Return the analyzed policy data
     res.status(200).json({ 
       status: 'success', 
-      text: extractedText 
+      policyData: policyData,
+      rawText: extractedText.substring(0, 1000) + '...' // Include a sample of the raw text for debugging
     });
 
   } catch (error) {
@@ -140,95 +210,144 @@ app.post('/analyze', upload.single('file'), async (req, res) => {
 /**
  * POST /chat endpoint
  * 
- * This endpoint accepts a question and PDF text, then uses OpenAI's GPT-3.5-turbo
- * to generate an answer based on the PDF content.
+ * This endpoint accepts a question and policy ID, retrieves the policy data,
+ * and uses OpenAI's GPT-4o to generate an answer based on the policy content.
  * 
  * Request body should contain:
- * - question: The user's question about the PDF
- * - pdfText: The text extracted from the PDF
+ * - question: The user's question about the policy
+ * - policyId: The ID of the policy to reference
  * 
  * Response will contain:
+ * - status: 'success' or 'error'
  * - answer: The AI-generated response to the question
+ * - message: Error message if applicable
  */
 app.post('/chat', async (req, res) => {
   try {
-    // Extract question and pdfText from the request body
-    const { question, pdfText } = req.body;
+    // Extract question and policyId from the request body
+    const { question, policyId } = req.body;
     
-    // Validate that both question and pdfText are provided
-    if (!question || !pdfText) {
+    // Validate that both question and policyId are provided
+    if (!question || !policyId) {
       return res.status(400).json({ 
         status: 'error', 
-        message: 'Both question and pdfText are required' 
+        message: 'Both question and policyId are required' 
       });
     }
     
     console.log('Received question:', question);
-    console.log('PDF text length:', pdfText.length, 'characters');
+    console.log('Policy ID:', policyId);
     
-    // Create a prompt for the OpenAI API that includes both the PDF text and the question
-    // This helps the AI understand the context and provide a relevant answer
-    // We're limiting the text to 8000 characters (about 2000 tokens) to avoid token limits
-    // and reduce the request size
-    const maxPdfTextLength = 8000;
-    const truncatedPdfText = pdfText.substring(0, maxPdfTextLength);
+    // Check if the policy exists in storage
+    if (!policyStorage[policyId]) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Policy not found'
+      });
+    }
     
+    // Get the policy data
+    const policyData = policyStorage[policyId];
+    
+    // Create a prompt for the OpenAI API that includes the policy data and the question
     const prompt = `
-      I have the following text extracted from a PDF document:
+      I have the following insurance policy data:
       
-      ${truncatedPdfText}
+      Policy Name: ${policyData.name}
+      Policy Type: ${policyData.type}
       
-      ${pdfText.length > maxPdfTextLength ? '... [text truncated due to length] ...' : ''}
+      What's Covered:
+      ${policyData.covered.map(item => `- ${item}`).join('\n')}
       
-      Based on this document, please answer the following question:
+      What's Not Covered:
+      ${policyData.notCovered.map(item => `- ${item}`).join('\n')}
+      
+      Limits & Conditions:
+      ${policyData.limits.map(item => `- ${item}`).join('\n')}
+      
+      Contact Information:
+      - Phone: ${policyData.contact.phone}
+      - Email: ${policyData.contact.email}
+      - Website: ${policyData.contact.website}
+      
+      Based on this policy information, please answer the following question:
       ${question}
       
-      Please provide a concise and accurate answer based only on the information in the document.
+      Please provide a concise and accurate answer based only on the information provided about this policy.
+      If the information needed to answer the question is not available in the policy data, please state that clearly.
     `;
     
+    console.log('Sending question to OpenAI...');
+    
     // Call the OpenAI API to generate a response
-    // async/await is used here to handle the asynchronous API call
-    // - async marks this as an asynchronous function that returns a Promise
-    // - await pauses execution until the Promise is resolved
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o', // Using GPT-4o as requested by the user
+      model: 'gpt-4o',
       messages: [
-        { role: 'system', content: 'You are a helpful assistant that answers questions about PDF documents.' },
+        { 
+          role: 'system', 
+          content: 'You are a helpful insurance assistant that answers questions about insurance policies. Provide accurate, concise answers based only on the policy information provided.' 
+        },
         { role: 'user', content: prompt }
       ],
-      max_tokens: 500, // Limit the response length
-      temperature: 0.7, // Controls randomness: lower is more deterministic
+      max_tokens: 500,
+      temperature: 0.7,
     });
     
-    // Extract the answer from the API response
+    // Extract the answer from the OpenAI response
     const answer = completion.choices[0].message.content;
     
-    console.log('Generated answer:', answer.substring(0, 100) + '...');
+    console.log('Generated answer for question');
     
-    // Return the answer in the response
-    res.status(200).json({ 
-      status: 'success', 
-      answer: answer 
+    // Return the answer
+    res.status(200).json({
+      status: 'success',
+      answer: answer
     });
     
   } catch (error) {
-    // Handle any errors that occur during processing
-    console.error('Error generating answer:', error);
+    console.error('Error processing chat request:', error);
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /policy/:policyId endpoint
+ * 
+ * This endpoint retrieves policy data by ID from the in-memory storage.
+ * In a production environment, this would fetch from a database.
+ * 
+ * URL parameters:
+ * - policyId: The ID of the policy to retrieve
+ * 
+ * Response will contain:
+ * - status: 'success' or 'error'
+ * - policyData: The policy data if found
+ * - message: Error message if applicable
+ */
+app.get('/policy/:policyId', (req, res) => {
+  try {
+    const { policyId } = req.params;
     
-    // Check if it's an OpenAI API error and log detailed information
-    if (error.response) {
-      console.error('OpenAI API error status:', error.response.status);
-      console.error('OpenAI API error data:', JSON.stringify(error.response.data, null, 2));
-      console.error('OpenAI API error headers:', JSON.stringify(error.response.headers, null, 2));
-    } else if (error.message) {
-      console.error('Error message:', error.message);
+    // Check if the policy exists in storage
+    if (policyStorage[policyId]) {
+      res.status(200).json({
+        status: 'success',
+        policyData: policyStorage[policyId]
+      });
+    } else {
+      res.status(404).json({
+        status: 'error',
+        message: 'Policy not found'
+      });
     }
-    
-    // Return an error response with more details to help debugging
-    res.status(500).json({ 
-      status: 'error', 
-      message: error.message || 'Error generating answer',
-      details: error.response ? error.response.data : null
+  } catch (error) {
+    console.error('Error retrieving policy:', error);
+    res.status(500).json({
+      status: 'error',
+      message: error.message
     });
   }
 });
