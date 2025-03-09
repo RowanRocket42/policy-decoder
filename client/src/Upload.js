@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import Chat from './Chat'; // Import the Chat component
+import './Upload.css'; // Import the new CSS file for Upload component
 
 /**
  * Upload Component
  * 
- * This component allows users to upload PDF files to the server for analysis.
- * It also renders the Chat component to ask questions about the PDF.
+ * This component provides a single-page interface for uploading PDFs and chatting about them.
+ * It uses conditional rendering to switch between upload and chat views.
  */
 function Upload() {
   // useState is a React Hook that lets you add state to functional components
-  // Here we're creating three state variables:
-  // 1. file - to store the selected file
-  // 2. message - to store status messages for the user
-  // 3. pdfText - to store the extracted text from the PDF
-  const [file, setFile] = useState(null);
-  const [message, setMessage] = useState('');
-  const [pdfText, setPdfText] = useState('');
+  // Here we're creating state variables:
+  const [file, setFile] = useState(null);           // Stores the selected file
+  const [message, setMessage] = useState('');       // Stores status messages for the user
+  const [pdfText, setPdfText] = useState('');       // Stores the extracted text (not displayed)
+  const [isUploaded, setIsUploaded] = useState(false); // Tracks if a PDF has been uploaded successfully
+  const [isLoading, setIsLoading] = useState(false);   // Tracks if an upload is in progress
 
   /**
    * handleFileChange
@@ -35,7 +35,8 @@ function Upload() {
     
     // Reset any previous messages and extracted text
     setMessage('');
-    setPdfText(''); // Reset the PDF text when a new file is selected
+    setPdfText(''); 
+    setIsUploaded(false); // Reset the uploaded state when a new file is selected
   };
 
   /**
@@ -58,6 +59,9 @@ function Upload() {
     }
 
     try {
+      // Set loading state to true to show loading indicator
+      setIsLoading(true);
+      
       // Create a FormData object to send the file
       // FormData is a built-in browser API for creating form data to send with fetch
       const formData = new FormData();
@@ -71,7 +75,6 @@ function Upload() {
       const response = await fetch('http://localhost:3002/analyze', {
         method: 'POST',  // Using POST method to send data to the server
         body: formData,  // The FormData object containing our file
-        // No need to set Content-Type header as it's automatically set with the correct boundary for FormData
       });
 
       // Parse the JSON response from the server
@@ -86,67 +89,94 @@ function Upload() {
       // Store the extracted text if it exists in the response
       if (data.text) {
         // Update our pdfText state with the extracted text from the PDF
-        // This will be passed to the Chat component as a prop
+        // We store this but don't display it directly - it's passed to the Chat component
         setPdfText(data.text);
+        
+        // Set isUploaded to true to switch to the chat view
+        // This is a key part of our conditional rendering approach
+        setIsUploaded(true);
       }
     } catch (error) {
       // If an error occurs during the fetch operation, catch it and handle it
       console.error('Error uploading file:', error);
       setMessage('Error uploading file. Please try again.');
+    } finally {
+      // Set loading state back to false when done
+      setIsLoading(false);
     }
   };
 
+  /**
+   * handleReset
+   * 
+   * This function resets the component state to allow uploading a different PDF.
+   */
+  const handleReset = () => {
+    setFile(null);
+    setMessage('');
+    setPdfText('');
+    setIsUploaded(false);
+  };
+
   return (
-    <div className="upload-container">
-      <h2>Upload PDF for Analysis</h2>
-      
-      <div className="file-input-container">
-        {/* File input element that triggers handleFileChange when a file is selected */}
-        <input 
-          type="file" 
-          onChange={handleFileChange} 
-          accept=".pdf" 
-        />
-        <p className="file-info">
-          {file ? `Selected file: ${file.name}` : 'No file selected'}
-        </p>
-      </div>
+    <div className="app-container">
+      {/* 
+        Conditional rendering based on isUploaded state:
+        - If a PDF has been uploaded successfully, show the Chat component
+        - Otherwise, show the upload interface
+        This approach creates a single-page experience with no page transitions
+      */}
+      {!isUploaded ? (
+        // Upload interface - shown when no PDF has been uploaded yet
+        <div className="upload-view">
+          <div className="upload-card">
+            <h2>Upload PDF for Analysis</h2>
+            
+            <div className="file-input-container">
+              {/* File input element that triggers handleFileChange when a file is selected */}
+              <input 
+                type="file" 
+                id="file-input"
+                onChange={handleFileChange} 
+                accept=".pdf"
+                className="file-input" 
+              />
+              <label htmlFor="file-input" className="file-input-label">
+                Choose PDF File
+              </label>
+              
+              <p className="file-info">
+                {file ? `Selected: ${file.name}` : 'No file selected'}
+              </p>
+            </div>
 
-      {/* Button to trigger the upload process */}
-      <button 
-        onClick={handleUpload} 
-        disabled={!file}
-      >
-        Upload PDF
-      </button>
+            {/* Button to trigger the upload process */}
+            <button 
+              onClick={handleUpload} 
+              disabled={!file || isLoading}
+              className="upload-button"
+            >
+              {isLoading ? 'Uploading...' : 'Upload PDF'}
+            </button>
 
-      {/* Display messages to the user */}
-      {message && <p className="message">{message}</p>}
-      
-      {/* Display extracted text if available */}
-      {pdfText && (
-        <div className="extracted-text-container">
-          <h3>Extracted Text:</h3>
-          <div className="extracted-text">
-            {/* 
-              We're splitting the text by newlines and mapping each line to a paragraph
-              This makes the text more readable on the page
-              The 'key' prop is required by React when rendering lists of elements
-            */}
-            {pdfText.split('\n').map((line, index) => (
-              <p key={index}>{line}</p>
-            ))}
+            {/* Display messages to the user */}
+            {message && <p className={`status-message ${message.includes('Error') ? 'error' : 'success'}`}>{message}</p>}
           </div>
         </div>
-      )}
-      
-      {/* 
-        Render the Chat component if we have PDF text
-        We pass the pdfText as a prop to the Chat component
-        The Chat component will use this text to generate answers to questions
-      */}
-      {pdfText && (
-        <div className="chat-section">
+      ) : (
+        // Chat interface - shown after a PDF has been uploaded successfully
+        <div className="chat-view">
+          {/* Small header with file info and reset button */}
+          <div className="chat-header-bar">
+            <div className="file-info-small">
+              <span>Analyzing: {file?.name}</span>
+            </div>
+            <button onClick={handleReset} className="reset-button">
+              Upload Different PDF
+            </button>
+          </div>
+          
+          {/* Chat component that receives the PDF text as a prop */}
           <Chat pdfText={pdfText} />
         </div>
       )}

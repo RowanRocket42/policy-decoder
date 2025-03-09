@@ -11,7 +11,9 @@
   display: flex;
   flex-direction: column;
   height: 600px; /* Fixed height for the chat container */
+  max-height: 80vh; /* Ensure it doesn't exceed viewport height */
   color: #e4e4e4; /* Light text color for dark background */
+  overflow: hidden; /* Prevent overall container scrolling */
 }
 
 /* Header styles */
@@ -36,7 +38,7 @@
 /* Container for the list of messages */
 .messages-list {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: auto; /* Only the message list should scroll */
   padding: 10px;
   margin-bottom: 15px;
   display: flex;
@@ -115,6 +117,7 @@
   background-color: #2d2d3a;
   border-radius: 8px;
   margin-top: auto; /* Push to bottom */
+  min-height: 60px; /* Ensure consistent height */
 }
 
 /* Text input field */
@@ -157,6 +160,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 80px; /* Ensure consistent width */
 }
 
 .chat-submit-button:hover:not(:disabled) {

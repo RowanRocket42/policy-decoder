@@ -1,0 +1,217 @@
+/* Upload.css - Styles for the Upload component */
+
+/* 
+ * Main container for the entire application
+ * Uses flexbox to center content both horizontally and vertically
+ * Sets a fixed height to prevent scrolling
+ */
+.app-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Full viewport height */
+  width: 100%;
+  background-color: #1e1e1e; /* Dark background color */
+  color: #ffffff; /* White text */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrolling */
+}
+
+/* 
+ * Upload view container
+ * This is shown when no PDF has been uploaded yet
+ * Uses flexbox for centering
+ */
+.upload-view {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 800px; /* Limit width for better readability */
+  height: 80vh; /* Limit height to prevent scrolling */
+}
+
+/* 
+ * Upload card
+ * This is the card that contains the file input and upload button
+ * Uses a darker background with subtle shadow for depth
+ */
+.upload-card {
+  background-color: #252526; /* Slightly lighter than the main background */
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  padding: 2rem;
+  width: 100%;
+  max-width: 500px; /* Limit width for better focus */
+  text-align: center;
+}
+
+/* 
+ * File input container
+ * Contains the file input and its label
+ */
+.file-input-container {
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 
+ * Hide the actual file input
+ * We'll style the label instead for better design control
+ */
+.file-input {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+/* 
+ * Style the label to look like a button
+ * This creates a custom-styled file input button
+ */
+.file-input-label {
+  background-color: #2979ff; /* Blue color */
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  display: inline-block;
+}
+
+.file-input-label:hover {
+  background-color: #1565c0; /* Darker blue on hover */
+}
+
+/* 
+ * File info text
+ * Shows the name of the selected file
+ */
+.file-info {
+  margin-top: 1rem;
+  color: #cccccc; /* Light gray text */
+  font-size: 0.9rem;
+}
+
+/* 
+ * Upload button
+ * Primary action button for uploading the PDF
+ */
+.upload-button {
+  background-color: #4caf50; /* Green color */
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+  min-width: 150px;
+}
+
+.upload-button:hover:not(:disabled) {
+  background-color: #388e3c; /* Darker green on hover */
+}
+
+.upload-button:disabled {
+  background-color: #4c4c4c; /* Gray when disabled */
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* 
+ * Status message
+ * Shows success or error messages to the user
+ */
+.status-message {
+  margin-top: 1.5rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.status-message.success {
+  background-color: rgba(76, 175, 80, 0.2); /* Semi-transparent green */
+  color: #81c784; /* Light green text */
+}
+
+.status-message.error {
+  background-color: rgba(244, 67, 54, 0.2); /* Semi-transparent red */
+  color: #e57373; /* Light red text */
+}
+
+/* 
+ * Chat view container
+ * This is shown after a PDF has been uploaded
+ * Takes up the full available space
+ */
+.chat-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 800px;
+  height: 80vh; /* Limit height to prevent scrolling */
+}
+
+/* 
+ * Chat header bar
+ * Contains file info and reset button
+ * Fixed at the top of the chat view
+ */
+.chat-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: #252526; /* Slightly lighter than the main background */
+  border-radius: 8px 8px 0 0;
+  border-bottom: 1px solid #333333;
+}
+
+/* 
+ * Small file info in the header
+ * Shows which file is being analyzed
+ */
+.file-info-small {
+  font-size: 0.85rem;
+  color: #cccccc; /* Light gray text */
+}
+
+/* 
+ * Reset button
+ * Allows the user to upload a different PDF
+ */
+.reset-button {
+  background-color: transparent;
+  color: #2979ff; /* Blue text */
+  border: 1px solid #2979ff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.reset-button:hover {
+  background-color: rgba(41, 121, 255, 0.1); /* Semi-transparent blue */
+}
+
+/* 
+ * Override the Chat component styles to fit our layout
+ * These ensure the Chat component works within our fixed-height layout
+ */
+.chat-view .chat-container {
+  margin: 0;
+  border-radius: 0 0 8px 8px;
+  height: calc(80vh - 50px); /* Subtract header height */
+  max-height: none;
+  overflow: hidden;
+} 
