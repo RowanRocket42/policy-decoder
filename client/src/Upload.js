@@ -107,8 +107,8 @@ function Upload() {
       // Set the message to inform the user that upload is in progress
       setMessage('Uploading...');
 
-      // Send the file to the server using fetch
-      const response = await fetch('http://localhost:3002/analyze', {
+      // Send the file to the server for analysis
+      const response = await fetch('http://localhost:8000/analyze', {
         method: 'POST',
         body: formData,
       });

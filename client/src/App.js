@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css'; // Importing the CSS for this component
 import HomePage from './HomePage'; // Importing our HomePage component
 import Chat from './Chat'; // Importing our Chat component
+import About from './About'; // Importing our About component
 
 /**
  * App Component
@@ -15,6 +16,7 @@ import Chat from './Chat'; // Importing our Chat component
  * Routes:
  * - / : HomePage component (insurance type selection)
  * - /chat/:policyId : Chat component (chat interface for asking questions about a policy)
+ * - /about : About component (information about Clarifai)
  */
 function App() {
   return (
@@ -23,6 +25,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/chat/:policyId" element={<Chat />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </Router>
     </div>

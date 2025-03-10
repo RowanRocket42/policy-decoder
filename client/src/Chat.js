@@ -56,8 +56,8 @@ function Chat() {
         // Show loading state
         setIsLoading(true);
         
-        // Make an API call to fetch the policy data
-        const response = await fetch(`http://localhost:3002/policy/${policyId}`);
+        // Fetch policy data from the server
+        const response = await fetch(`http://localhost:8000/policy/${policyId}`);
         
         // Check if the response is ok
         if (!response.ok) {
@@ -180,7 +180,7 @@ function Chat() {
       setIsLoading(true);
 
       // Send the question to the server
-      const response = await fetch('http://localhost:3002/chat', {
+      const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -275,10 +275,13 @@ function Chat() {
     <div className="chat-page-container">
       {/* Top Navigation Bar */}
       <nav className="top-nav">
-        <div className="brand-name" onClick={() => navigate('/')}>CoverScan</div>
+        <div className="brand-name" onClick={() => navigate('/')}>
+          <img src="/Images/clarifai-logo.png" alt="Clarifai Logo" className="nav-logo" />
+        </div>
         <div className="main-nav">
-          <a href="#features">Features</a>
-          <a href="#how-it-works">How it Works</a>
+          <a href="/#features">Features</a>
+          <a href="/#how-it-works">How it Works</a>
+          <a href="/about">About</a>
           <a href="#contact">Contact</a>
         </div>
       </nav>

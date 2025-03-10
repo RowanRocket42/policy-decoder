@@ -83,6 +83,14 @@
   color: var(--primary-color);
   letter-spacing: -0.5px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.nav-logo {
+  height: 35px;
+  width: auto;
+  max-width: 160px;
 }
 
 /* 

@@ -36,8 +36,8 @@ const { parsePDF } = require('./parser');
 const app = express();
 
 // Define the port to run the server on
-// We're using port 3002 since 3001 is already in use
-const PORT = 3002;
+// We're using the PORT from the .env file, or 3002 as a fallback
+const PORT = process.env.PORT || 3002;
 
 // Enable CORS - this allows our frontend (running on a different port) to communicate with the backend
 app.use(cors());

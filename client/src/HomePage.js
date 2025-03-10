@@ -77,10 +77,13 @@ function HomePage() {
     <div className="modern-homepage">
       {/* Header */}
       <header className="modern-header">
-        <div className="logo">CoverScan</div>
+        <div className="logo">
+          <img src="/Images/clarifai-logo.png" alt="Clarifai Logo" className="header-logo" />
+        </div>
         <nav className="main-nav">
           <a href="#how-it-works">How It Works</a>
           <a href="#features">Features</a>
+          <a href="/about">About</a>
           <button className="cta-button-small" onClick={handleUploadClick}>Upload Policy</button>
         </nav>
       </header>
@@ -95,7 +98,6 @@ function HomePage() {
           <div className="hero-cta">
             <button className="primary-button" onClick={handleUploadClick}>
               Upload Your Policy
-              <span className="button-icon">↑</span>
             </button>
             <input 
               type="file" 
@@ -190,7 +192,6 @@ function HomePage() {
           </p>
           <button className="primary-button" onClick={handleUploadClick}>
             Upload Your Policy
-            <span className="button-icon">↑</span>
           </button>
         </div>
       </section>
@@ -199,7 +200,9 @@ function HomePage() {
       <footer className="modern-footer">
         <div className="footer-content">
           <div className="footer-brand">
-            <div className="footer-logo">CoverScan</div>
+            <div className="footer-logo">
+              <img src="/Images/clarifai-logo.png" alt="Clarifai Logo" className="footer-logo-img" />
+            </div>
             <p className="footer-tagline">Making insurance transparent</p>
           </div>
           <div className="footer-links">
@@ -207,6 +210,7 @@ function HomePage() {
               <h4>Product</h4>
               <a href="#how-it-works">How It Works</a>
               <a href="#features">Features</a>
+              <a href="/about">About</a>
             </div>
             <div className="footer-column">
               <h4>Legal</h4>
@@ -216,7 +220,7 @@ function HomePage() {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} CoverScan. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Clarifai. All rights reserved.</p>
         </div>
       </footer>
     </div>
