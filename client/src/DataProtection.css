@@ -1,0 +1,717 @@
+/* DataProtection.css - Styles for the Data Protection and Privacy page */
+
+/* Import Google Fonts - Inter for modern, clean typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* 
+ * Global styles and variables - using the same as HomePage.css
+ */
+:root {
+  --primary-color: #00A86B;       /* Jade Green */
+  --primary-dark: #008755;        /* Darker Jade Green for hover states */
+  --primary-light: #E0F5EE;       /* Light Jade Green for backgrounds */
+  --accent-color: #ff6b6b;        /* Accent color for highlights */
+  --success-color: #4caf50;       /* Green for success states */
+  --warning-color: #ff9800;       /* Orange for warnings */
+  --text-dark: #e4e4e4;           /* Light gray for primary text in dark mode */
+  --text-medium: #b0b0b0;         /* Medium gray for secondary text in dark mode */
+  --text-light: #8a8a8a;          /* Dark gray for tertiary text in dark mode */
+  --background-color: #121212;    /* Dark background */
+  --background-alt: #121212;      /* Same as background color for consistency */
+  --card-background: #1e1e2e;     /* Dark card background */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for dark mode */
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25); /* Medium shadow for dark mode */
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3); /* Large shadow for dark mode */
+  --border-radius-sm: 8px;        /* Small border radius */
+  --border-radius-md: 12px;       /* Medium border radius */
+  --border-radius-lg: 20px;       /* Large border radius */
+  --border-radius-full: 9999px;   /* Full rounded corners */
+  --spacing-xs: 8px;              /* Extra small spacing */
+  --spacing-sm: 16px;             /* Small spacing */
+  --spacing-md: 24px;             /* Medium spacing */
+  --spacing-lg: 32px;             /* Large spacing */
+  --spacing-xl: 48px;             /* Extra large spacing */
+  --spacing-xxl: 64px;            /* Extra extra large spacing */
+  --transition-fast: 0.2s;        /* Fast transitions */
+  --transition-normal: 0.3s;      /* Normal transitions */
+  --container-width: 90%;         /* Container width as percentage of viewport */
+  --container-max-width: 1200px;  /* Maximum container width */
+  --header-height: 70px;          /* Fixed header height */
+}
+
+/* 
+ * Base styles
+ */
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: var(--text-dark);
+  background-color: var(--background-color);
+  line-height: 1.6;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: auto;
+  min-height: 100%;
+  width: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 
+ * Data Protection page container
+ */
+.data-protection-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--background-color);
+  overflow-y: auto;
+  position: relative;
+}
+
+/* 
+ * Modern header - same as other pages
+ */
+.modern-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--spacing-lg);
+  height: var(--header-height);
+  background-color: #121212;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+/* 
+ * Logo
+ */
+.logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: -0.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* 
+ * Header logo
+ */
+.header-logo {
+  height: 40px;
+  width: auto;
+}
+
+/* 
+ * Main navigation
+ */
+.main-nav {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+/* 
+ * Navigation links
+ */
+.main-nav a {
+  color: var(--text-dark);
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+/* 
+ * Navigation links hover state
+ */
+.main-nav a:hover {
+  color: var(--primary-color);
+}
+
+/* 
+ * Data Protection section
+ */
+.data-protection-section {
+  padding: var(--spacing-xxl) var(--spacing-lg);
+  background-color: var(--background-color);
+  width: 100%;
+  text-align: center;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* 
+ * Data Protection container
+ */
+.data-protection-container {
+  width: var(--container-width);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  background-color: var(--background-alt);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* 
+ * Data Protection title
+ */
+.data-protection-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: var(--spacing-sm);
+  text-align: center;
+  position: relative;
+  width: 100%;
+  display: block;
+}
+
+/* 
+ * Data Protection tagline
+ */
+.data-protection-tagline {
+  font-size: 18px;
+  color: var(--text-medium);
+  margin: 0 auto var(--spacing-xl);
+  max-width: 600px;
+  text-align: center;
+  width: 100%;
+  display: block;
+}
+
+/* 
+ * Data Protection content
+ */
+.data-protection-content {
+  text-align: left;
+}
+
+/* 
+ * Section heading
+ */
+.section-heading {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: var(--spacing-xl) 0 var(--spacing-md);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 2px solid var(--primary-color);
+  display: inline-block;
+}
+
+/* 
+ * Security measures list
+ */
+.security-measures-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  margin: var(--spacing-lg) 0;
+}
+
+/* 
+ * Security measure item
+ */
+.security-measure-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.security-measure-item:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+/* 
+ * Security measure icon
+ */
+.security-measure-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--border-radius-full);
+  background-color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Icon-specific backgrounds */
+.security-measure-icon.secure-processing::before {
+  content: "🔒";
+  font-size: 24px;
+}
+
+.security-measure-icon.encryption::before {
+  content: "🔐";
+  font-size: 24px;
+}
+
+.security-measure-icon.tokenization::before {
+  content: "🔄";
+  font-size: 24px;
+}
+
+.security-measure-icon.session-based::before {
+  content: "⏱️";
+  font-size: 24px;
+}
+
+.security-measure-icon.zero-knowledge::before {
+  content: "👁️";
+  font-size: 24px;
+}
+
+/* 
+ * Security measure text
+ */
+.security-measure-text {
+  flex: 1;
+}
+
+.security-measure-text h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 var(--spacing-xs);
+}
+
+.security-measure-text p {
+  font-size: 16px;
+  color: var(--text-medium);
+  margin: 0;
+}
+
+/* 
+ * Data handling steps
+ */
+.data-handling-steps {
+  padding-left: var(--spacing-lg);
+  margin: var(--spacing-md) 0;
+}
+
+.data-handling-steps li {
+  margin-bottom: var(--spacing-md);
+  color: var(--text-dark);
+}
+
+.data-handling-steps strong {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* 
+ * Info box
+ */
+.info-box {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-xl) 0;
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--primary-color);
+}
+
+.info-box h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 var(--spacing-md);
+}
+
+/* 
+ * Terminology list
+ */
+.terminology-list {
+  margin: 0;
+}
+
+.terminology-list dt {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-top: var(--spacing-md);
+}
+
+.terminology-list dd {
+  font-size: 15px;
+  color: var(--text-medium);
+  margin-left: 0;
+  margin-bottom: var(--spacing-md);
+}
+
+/* 
+ * Compliance list
+ */
+.compliance-list {
+  list-style-type: none;
+  padding: 0;
+  margin: var(--spacing-md) 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.compliance-list li {
+  padding: var(--spacing-md);
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+  color: var(--text-dark);
+  transition: transform var(--transition-fast);
+}
+
+.compliance-list li:hover {
+  transform: scale(1.05);
+  background-color: var(--primary-dark);
+}
+
+/* 
+ * Data Protection conclusion
+ */
+.data-protection-conclusion {
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.data-protection-conclusion p {
+  font-size: 16px;
+  color: var(--text-medium);
+  margin-bottom: var(--spacing-md);
+}
+
+.data-protection-conclusion p:last-child {
+  margin-bottom: 0;
+}
+
+.data-protection-conclusion a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.data-protection-conclusion a:hover {
+  color: var(--primary-light);
+  text-decoration: underline;
+}
+
+/* 
+ * Modern footer - same as other pages
+ */
+.modern-footer {
+  background-color: #121212;
+  padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-lg);
+  margin-top: auto;
+  position: relative;
+}
+
+/* 
+ * Footer content
+ */
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: var(--container-width);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  flex-wrap: wrap;
+  gap: var(--spacing-xl);
+}
+
+/* 
+ * Footer brand
+ */
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* 
+ * Footer logo
+ */
+.footer-logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+}
+
+/* 
+ * Footer logo image
+ */
+.footer-logo-img {
+  height: auto;
+  width: auto;
+  max-width: 180px;
+  max-height: 50px;
+  object-fit: contain;
+}
+
+/* 
+ * Footer tagline
+ */
+.footer-tagline {
+  font-size: 14px;
+  color: var(--text-medium);
+  margin: var(--spacing-xs) 0 0;
+}
+
+/* 
+ * Footer links
+ */
+.footer-links {
+  display: flex;
+  gap: var(--spacing-xl);
+  flex-wrap: wrap;
+}
+
+/* 
+ * Footer column
+ */
+.footer-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+}
+
+/* 
+ * Footer column heading
+ */
+.footer-column h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 var(--spacing-md);
+}
+
+/* 
+ * Footer column links
+ */
+.footer-column a {
+  font-size: 14px;
+  color: var(--text-medium);
+  text-decoration: none;
+  margin-bottom: var(--spacing-xs);
+  transition: color var(--transition-fast);
+}
+
+/* 
+ * Footer column links hover state
+ */
+.footer-column a:hover {
+  color: var(--primary-color);
+}
+
+/* 
+ * Footer bottom
+ */
+.footer-bottom {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  width: var(--container-width);
+  max-width: var(--container-max-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.footer-bottom p {
+  font-size: 14px;
+  color: var(--text-light);
+  margin: 0;
+}
+
+/* 
+ * Responsive styles
+ */
+@media (max-width: 1024px) {
+  :root {
+    --container-width: 95%;
+  }
+  
+  .data-protection-title {
+    font-size: 32px;
+  }
+  
+  .data-protection-tagline {
+    font-size: 18px;
+  }
+  
+  .security-measure-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .security-measure-icon {
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .compliance-list {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --spacing-xl: 32px;
+    --spacing-xxl: 48px;
+  }
+  
+  .modern-header {
+    padding: 0 var(--spacing-md);
+  }
+  
+  .main-nav {
+    gap: var(--spacing-sm);
+  }
+  
+  .main-nav a {
+    font-size: 14px;
+  }
+  
+  .data-protection-title {
+    font-size: 28px;
+  }
+  
+  .data-protection-tagline {
+    font-size: 16px;
+  }
+  
+  .section-heading {
+    font-size: 22px;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-lg);
+  }
+  
+  .footer-brand {
+    align-items: center;
+    width: 100%;
+  }
+  
+  .footer-links {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-xxl: 48px;
+    --container-width: 100%;
+  }
+  
+  .modern-header {
+    padding: 0 var(--spacing-sm);
+    height: auto;
+    padding: var(--spacing-sm) var(--spacing-sm);
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .main-nav {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .data-protection-section {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+  
+  .data-protection-container {
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+  }
+  
+  .data-protection-title {
+    font-size: 24px;
+  }
+  
+  .data-protection-tagline {
+    font-size: 15px;
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .section-heading {
+    font-size: 20px;
+  }
+  
+  .security-measure-text h3 {
+    font-size: 16px;
+  }
+  
+  .security-measure-text p {
+    font-size: 14px;
+  }
+  
+  .info-box {
+    padding: var(--spacing-md);
+  }
+  
+  .terminology-list dt {
+    font-size: 15px;
+  }
+  
+  .terminology-list dd {
+    font-size: 14px;
+  }
+  
+  .compliance-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .footer-links {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+  
+  .footer-column {
+    width: 100%;
+    align-items: center;
+  }
+  
+  .footer-logo-img {
+    max-height: 40px;
+    max-width: 150px;
+  }
+  
+  .footer-tagline {
+    text-align: center;
+  }
+} 

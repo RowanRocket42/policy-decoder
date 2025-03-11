@@ -422,6 +422,7 @@ function HomePage() {
               <h4>Legal</h4>
               <a href="/privacy-policy">Privacy Policy</a>
               <a href="/terms-of-service">Terms of Service</a>
+              <a href="/data-protection">Data Protection and Privacy</a>
               <a href="/cookie-policy">Cookie Policy</a>
             </div>
           </div>

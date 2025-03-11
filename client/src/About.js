@@ -110,11 +110,12 @@ function About() {
               <h4>Legal</h4>
               <a href="/privacy-policy">Privacy Policy</a>
               <a href="/terms-of-service">Terms of Service</a>
+              <a href="/data-protection">Data Protection and Privacy</a>
             </div>
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} Clarifai. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} CoverScan. All rights reserved.</p>
         </div>
       </footer>
     </div>
