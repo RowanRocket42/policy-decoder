@@ -11,13 +11,11 @@ import {
   FiSearch, 
   FiMessageSquare, 
   FiCheckCircle, 
-  FiAlertTriangle, 
   FiLock, 
   FiArrowRight, 
   FiStar, 
   FiShield, 
   FiClock, 
-  FiDollarSign, 
   FiUsers, 
   FiHeart, 
   FiHome, 
@@ -402,7 +400,7 @@ function HomePage() {
         <div className="footer-content">
           <div className="footer-brand">
             <div className="footer-logo">
-              <img src="/Images/clarifai-logo.png" alt="CoverScan Logo" className="footer-logo-img" />
+              <img src="/Images/logo2.png" alt="CoverScan Logo" className="footer-logo-img" />
             </div>
             <p className="footer-tagline">Making insurance transparent</p>
           </div>

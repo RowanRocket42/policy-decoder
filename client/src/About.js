@@ -95,7 +95,7 @@ function About() {
         <div className="footer-content">
           <div className="footer-brand">
             <div className="footer-logo">
-              <img src="/Images/clarifai-logo.png" alt="Clarifai Logo" className="footer-logo-img" />
+              <img src="/Images/logo2.png" alt="CoverScan Logo" className="footer-logo-img" />
             </div>
             <p className="footer-tagline">Making insurance transparent</p>
           </div>
@@ -108,8 +108,8 @@ function About() {
             </div>
             <div className="footer-column">
               <h4>Legal</h4>
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
+              <a href="/privacy-policy">Privacy Policy</a>
+              <a href="/terms-of-service">Terms of Service</a>
             </div>
           </div>
         </div>
