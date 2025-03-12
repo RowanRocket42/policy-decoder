@@ -35,8 +35,16 @@ function PolicySummary() {
   useEffect(() => {
     const fetchPolicyData = async () => {
       try {
-        // Fetch policy data from the server
-        const response = await fetch(`https://your-api-endpoint.com/policy/${policyId}`);
+        // Get the API URL and key from environment variables or use defaults
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+        const apiKey = process.env.REACT_APP_API_KEY || 'policy_decoder_api_key_12345';
+        
+        // Fetch policy data from the server with API key in header
+        const response = await fetch(`${apiUrl}/policy/${policyId}`, {
+          headers: {
+            'X-API-Key': apiKey
+          }
+        });
         
         if (!response.ok) {
           throw new Error('Failed to fetch policy data');

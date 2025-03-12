@@ -170,12 +170,22 @@ function InsuranceUpload() {
       formData.append('insuranceType', insuranceType);
       formData.append('userConsent', 'true');
 
+      // Get the API URL from environment variable or use default
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const apiKey = process.env.REACT_APP_API_KEY;
+      
+      // Create headers object
+      const headers = {};
+      
+      // Add API key to headers if available
+      if (apiKey) {
+        headers['X-API-Key'] = apiKey;
+      }
+
       // Send the file to the server for analysis
-      const response = await fetch('http://localhost:8000/analyze', {
+      const response = await fetch(`${apiUrl}/analyze`, {
         method: 'POST',
-        headers: {
-          'X-API-Key': process.env.REACT_APP_API_KEY
-        },
+        headers: headers,
         body: formData,
       });
 
@@ -191,14 +201,29 @@ function InsuranceUpload() {
         setPolicyData(data.policyData);
         setIsAnalyzed(true);
       } else {
-        // Handle error case
-        setMessage('Failed to fetch policy data. Please try again.');
+        // Handle error case with more detailed error message
+        const errorMsg = data.message || 'Failed to fetch policy data. Please try again.';
+        setMessage(errorMsg);
         console.error('Server returned error or invalid data:', data);
       }
     } catch (error) {
       // Handle any errors that occur during the fetch operation
       console.error('Error uploading file:', error);
-      setMessage('Failed to fetch policy data. Please try again.');
+      
+      // Check if it's an authentication error
+      if (error.message && error.message.includes('401')) {
+        setMessage('Authentication failed. Please check API key configuration.');
+        console.error('API Key authentication failed');
+      } else {
+        // Use mock data as a fallback when the server call fails
+        console.log('Using mock data as fallback');
+        const mockData = getMockPolicyData(insuranceType, fileToUpload.name);
+        setPolicyData(mockData);
+        setIsAnalyzed(true);
+        
+        // Still show an error message to inform the user
+        setMessage('Connected to server failed, using demo data instead.');
+      }
     } finally {
       // Set loading state back to false when done
       setIsLoading(false);
