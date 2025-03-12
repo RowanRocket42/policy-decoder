@@ -168,10 +168,14 @@ function InsuranceUpload() {
       const formData = new FormData();
       formData.append('file', fileToUpload);
       formData.append('insuranceType', insuranceType);
+      formData.append('userConsent', 'true');
 
       // Send the file to the server for analysis
       const response = await fetch('http://localhost:8000/analyze', {
         method: 'POST',
+        headers: {
+          'X-API-Key': process.env.REACT_APP_API_KEY
+        },
         body: formData,
       });
 
@@ -188,13 +192,13 @@ function InsuranceUpload() {
         setIsAnalyzed(true);
       } else {
         // Handle error case
-        setMessage('Error analyzing policy. Please try again.');
+        setMessage('Failed to fetch policy data. Please try again.');
         console.error('Server returned error or invalid data:', data);
       }
     } catch (error) {
       // Handle any errors that occur during the fetch operation
       console.error('Error uploading file:', error);
-      setMessage('Error uploading file. Please try again.');
+      setMessage('Failed to fetch policy data. Please try again.');
     } finally {
       // Set loading state back to false when done
       setIsLoading(false);

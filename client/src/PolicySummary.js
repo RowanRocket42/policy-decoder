@@ -1,6 +1,7 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import './PolicySummary.css';
+import { FiArrowLeft } from 'react-icons/fi';
 
 /**
  * PolicySummary Component
@@ -8,17 +9,76 @@ import './PolicySummary.css';
  * This component displays a breakdown of an insurance policy,
  * showing covered items, not covered items, limits/conditions,
  * and contact information.
- * 
- * @param {Object} props - Component props
- * @param {Object} props.policyData - The policy data to display
- * @param {string} props.policyType - The type of insurance policy
  */
-function PolicySummary({ policyData, policyType }) {
-  // Navigation hook for redirecting to the chat page
+function PolicySummary() {
+  // Navigation hook for redirecting to different pages
   const navigate = useNavigate();
   
-  // If no policy data is provided, show a loading state
-  if (!policyData) {
+  // Get the policy ID from the URL parameters
+  const { policyId } = useParams();
+  
+  // State to store the policy data
+  const [policyData, setPolicyData] = useState(null);
+  
+  // State to store the policy type
+  const [policyType, setPolicyType] = useState('');
+  
+  // State to track loading status
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // State to track error message
+  const [errorMessage, setErrorMessage] = useState('');
+  
+  /**
+   * Fetch policy data when the component mounts
+   */
+  useEffect(() => {
+    const fetchPolicyData = async () => {
+      try {
+        // Fetch policy data from the server
+        const response = await fetch(`https://your-api-endpoint.com/policy/${policyId}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch policy data');
+        }
+        
+        const data = await response.json();
+        
+        // Set the policy data and type
+        setPolicyData(data);
+        setPolicyType(data.type || 'general');
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching policy data:', error);
+        setErrorMessage('Failed to fetch policy data. Please try again.');
+        setIsLoading(false);
+      }
+    };
+    
+    fetchPolicyData();
+  }, [policyId]);
+  
+  /**
+   * handleBackClick
+   * 
+   * Navigates back to the upload policy page
+   */
+  const handleBackClick = () => {
+    navigate('/upload-policy');
+  };
+  
+  /**
+   * handleAskQuestion
+   * 
+   * Navigates to the chat page for asking questions about the policy
+   */
+  const handleAskQuestion = () => {
+    // Navigate to the chat page with the policy ID
+    navigate(`/chat/${policyId}`);
+  };
+  
+  // If loading, show a loading state
+  if (isLoading) {
     return (
       <div className="policy-summary-container">
         <div className="policy-loading">
@@ -29,18 +89,41 @@ function PolicySummary({ policyData, policyType }) {
     );
   }
   
-  /**
-   * handleAskQuestion
-   * 
-   * Navigates to the chat page for asking questions about the policy
-   */
-  const handleAskQuestion = () => {
-    // Navigate to the chat page with the policy ID
-    navigate(`/chat/${policyData.id}`);
-  };
+  // If there's an error, show an error message
+  if (errorMessage) {
+    return (
+      <div className="policy-summary-container">
+        <div className="policy-error">
+          <p>{errorMessage}</p>
+          <button className="back-button" onClick={handleBackClick}>
+            <FiArrowLeft /> Back to Upload
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  // If no policy data is available, show an error
+  if (!policyData) {
+    return (
+      <div className="policy-summary-container">
+        <div className="policy-error">
+          <p>No policy data available. Please try uploading your policy again.</p>
+          <button className="back-button" onClick={handleBackClick}>
+            <FiArrowLeft /> Back to Upload
+          </button>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="policy-summary-container">
+      {/* Back button */}
+      <button className="back-button" onClick={handleBackClick}>
+        <FiArrowLeft /> Back to Upload
+      </button>
+      
       {/* Policy Header */}
       <div className="policy-header">
         <h1 className="policy-title">Policy Breakdown for {policyData.name}</h1>
@@ -131,7 +214,8 @@ function getInsuranceTypeLabel(type) {
     car: '🚗 Car & Vehicle Insurance',
     home: '🏠 Household/Homeowners Insurance',
     life: '❤️ Life, Funeral & Critical Illness Cover',
-    travel: '✈️ Travel Insurance'
+    travel: '✈️ Travel Insurance',
+    general: '📄 Insurance Policy'
   };
   
   return types[type] || 'Insurance Policy';

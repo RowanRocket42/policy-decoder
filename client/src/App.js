@@ -9,6 +9,7 @@ import UploadPolicy from './UploadPolicy'; // Importing our UploadPolicy compone
 import PolicySummary from './PolicySummary'; // Importing our PolicySummary component
 import PrivacyPolicy from './PrivacyPolicy'; // Importing our PrivacyPolicy component
 import DataProtection from './DataProtection'; // Importing our DataProtection component
+import FSCA from './FSCA'; // Importing our FSCA component
 
 /**
  * App Component
@@ -25,6 +26,7 @@ import DataProtection from './DataProtection'; // Importing our DataProtection c
  * - /about : About component (information about Clarifai)
  * - /privacy-policy : PrivacyPolicy component (privacy policy page)
  * - /data-protection : DataProtection component (data protection and privacy information)
+ * - /fsca : FSCA component (information about the Financial Sector Conduct Authority)
  */
 function App() {
   return (
@@ -38,6 +40,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/data-protection" element={<DataProtection />} />
+          <Route path="/fsca" element={<FSCA />} />
         </Routes>
       </Router>
     </div>

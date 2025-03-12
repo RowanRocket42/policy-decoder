@@ -57,7 +57,11 @@ function Chat() {
         setIsLoading(true);
         
         // Fetch policy data from the server
-        const response = await fetch(`http://localhost:8000/policy/${policyId}`);
+        const response = await fetch(`http://localhost:8000/policy/${policyId}`, {
+          headers: {
+            'X-API-Key': process.env.REACT_APP_API_KEY // Add API key to headers
+          }
+        });
         
         // Check if the response is ok
         if (!response.ok) {
@@ -184,6 +188,7 @@ function Chat() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-API-Key': process.env.REACT_APP_API_KEY // Add API key to headers
         },
         body: JSON.stringify({
           question: userQuestion,
@@ -258,9 +263,34 @@ function Chat() {
    * Navigates back to the policy summary page
    */
   const handleBackToPolicy = () => {
-    // Navigate back to the homepage
-    navigate('/');
+    // Navigate back to the policy summary page with the policy ID
+    navigate(`/policy-summary/${policyId}`);
   };
+
+  /**
+   * End the session when the component unmounts
+   */
+  useEffect(() => {
+    return () => {
+      // End the session when the component unmounts
+      if (policyId) {
+        fetch('https://your-api-endpoint.com/end-session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ policyId }),
+        })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Session ended:', data);
+          })
+          .catch(error => {
+            console.error('Error ending session:', error);
+          });
+      }
+    };
+  }, [policyId]);
 
   /**
    * toggleChat
@@ -282,7 +312,7 @@ function Chat() {
           <a href="/#features">Features</a>
           <a href="/#how-it-works">How it Works</a>
           <a href="/about">About</a>
-          <a href="#contact">Contact</a>
+          <a href="/contact">Contact</a>
         </div>
       </nav>
       
@@ -378,12 +408,11 @@ function Chat() {
         {policyData && showChat && (
           <div className="chat-view-container">
             <div className="chat-header">
-              <button className="back-to-summary" onClick={toggleChat}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-                Back to Policy Summary
+              <button className="back-button" onClick={handleBackToPolicy}>
+                <i className="fas fa-arrow-left"></i> Back to Policy Summary
               </button>
+              <h1 className="chat-title">Chat with Your Policy</h1>
+              <p className="chat-subtitle">Ask any question about your {policyData?.type || 'insurance'} policy</p>
             </div>
             
             <div className="chat-container">
@@ -476,7 +505,7 @@ function Chat() {
  * 
  * Returns mock policy data for demonstration purposes
  * 
- * @param {string} type - The policy type
+ * @param {string} type - The type of policy
  * @returns {Object} The mock policy data
  */
 function getMockPolicyData(type) {
@@ -647,81 +676,6 @@ function getMockPolicyData(type) {
       website: 'www.insurer.co.za'
     }
   };
-}
-
-/**
- * generateMockResponse
- * 
- * Generates a mock AI response based on the user's question and policy data
- * 
- * @param {string} question - The user's question
- * @param {Object} policyData - The policy data
- * @returns {string} The mock response
- */
-function generateMockResponse(question, policyData) {
-  // Convert question to lowercase for easier matching
-  const q = question.toLowerCase();
-  
-  // If no policy data, return a generic response
-  if (!policyData) {
-    return "I'm sorry, I don't have information about your policy yet. Please try again later.";
-  }
-  
-  // Check for greetings
-  if (q.includes('hello') || q.includes('hi') || q.includes('hey')) {
-    return `Hello! I'm your policy assistant for your ${policyData.name}. How can I help you today?`;
-  }
-  
-  // Check for coverage questions
-  if (q.includes('cover') || q.includes('covered') || q.includes('coverage')) {
-    return `Your ${policyData.name} covers the following:\n\n${policyData.covered.map(item => `- ${item}`).join('\n')}`;
-  }
-  
-  // Check for exclusion questions
-  if (q.includes('not covered') || q.includes('excluded') || q.includes('exclusion')) {
-    return `Your ${policyData.name} does **not** cover the following:\n\n${policyData.notCovered.map(item => `- ${item}`).join('\n')}`;
-  }
-  
-  // Check for limit questions
-  if (q.includes('limit') || q.includes('maximum') || q.includes('cap')) {
-    return `Your ${policyData.name} has the following limits and conditions:\n\n${policyData.limits.map(item => `- ${item}`).join('\n')}`;
-  }
-  
-  // Check for contact questions
-  if (q.includes('contact') || q.includes('call') || q.includes('email') || q.includes('phone')) {
-    return `You can contact your insurance provider for the ${policyData.name} using the following information:\n\n- Phone: ${policyData.contact.phone}\n- Email: ${policyData.contact.email}\n- Website: ${policyData.contact.website}`;
-  }
-  
-  // Check for claim questions
-  if (q.includes('claim') || q.includes('file a') || q.includes('submit')) {
-    return `To file a claim for your ${policyData.name}, you should:\n\n1. Contact your insurer at ${policyData.contact.phone}\n2. Provide your policy number and details of the incident\n3. Submit any required documentation\n4. Follow up on your claim status through the website: ${policyData.contact.website}`;
-  }
-  
-  // Check for premium questions
-  if (q.includes('premium') || q.includes('cost') || q.includes('price') || q.includes('pay')) {
-    return `Premium information is not available in this chat interface. Please contact customer service at ${policyData.contact.phone} for details about your premium, payment options, and due dates.`;
-  }
-  
-  // Check for South African specific questions
-  if (q.includes('south africa') || q.includes('sa') || q.includes('rsa') || q.includes('rand') || q.includes('zar')) {
-    return `Your ${policyData.name} is designed for the South African market and complies with local insurance regulations. All monetary values are in South African Rand (ZAR). For specific questions about South African insurance laws or regulations that might affect your policy, please contact your insurer directly.`;
-  }
-  
-  // Check for policy type specific questions
-  if (policyData.type === 'medical' && (q.includes('hospital') || q.includes('doctor') || q.includes('surgery'))) {
-    return `Your ${policyData.name} covers hospital accommodation in a standard room and surgical procedures. There's an annual limit of R100,000 for hospital treatment, and an excess of R500 per hospital admission applies.`;
-  }
-  
-  if (policyData.type === 'home' && (q.includes('flood') || q.includes('fire') || q.includes('theft'))) {
-    return `Your ${policyData.name} covers building damage from fire, flood, and storms, as well as theft and vandalism. However, please note that the flood damage excess is R1,000, higher than the standard excess of R500 for most other claims.`;
-  }
-  
-  if (policyData.type === 'auto' && (q.includes('accident') || q.includes('crash') || q.includes('collision') || q.includes('hijacking'))) {
-    return `Your ${policyData.name} covers damage to your vehicle from collision, as well as damage to other vehicles or property. It also includes coverage for hijacking. The standard excess is R750, but if the driver is under 25, an additional young driver excess of R1,200 applies.`;
-  }
-  
-  // Default response if no specific match
-  return `I understand you're asking about your ${policyData.name}. Could you please be more specific about what you'd like to know? You can ask about what's covered, what's not covered, policy limits, or how to contact your insurer.`;
 }
 
 export default Chat; 

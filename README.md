@@ -49,6 +49,25 @@ policy-decoder/
   - pdf2json - PDF text extraction
   - OpenAI API - AI-powered question answering
 
+## Security and API Key Management
+
+### API Keys
+- **NEVER commit API keys to version control**
+- Create a `.env` file in the server directory with your OpenAI API key:
+  ```
+  PORT=3002
+  NODE_ENV=development
+  OPENAI_API_KEY=your_openai_api_key_here
+  ```
+- For production, consider using a secrets management service instead of `.env` files
+- Rotate your API keys regularly and immediately if they are ever exposed
+
+### Security Best Practices
+- Keep all dependencies updated to the latest secure versions
+- Use HTTPS in production environments
+- Implement proper authentication before deploying to production
+- Review OpenAI's data usage policies before processing sensitive documents
+
 ## Getting Started
 
 ### Prerequisites

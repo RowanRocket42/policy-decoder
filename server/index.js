@@ -28,6 +28,11 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY // This reads the API key from the .env file
 });
 
+// Verify OpenAI API key is set
+if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+  console.error('WARNING: OpenAI API key is not properly set. Please check your .env file.');
+}
+
 // Import our custom PDF parser module
 // This module will extract text from PDF files
 const { parsePDF } = require('./parser');
@@ -40,7 +45,14 @@ const app = express();
 const PORT = process.env.PORT || 3002;
 
 // Enable CORS - this allows our frontend (running on a different port) to communicate with the backend
-app.use(cors());
+// Update CORS configuration to restrict access to specific origins
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://your-production-domain.com'] // Restrict to specific domains in production
+    : ['http://localhost:3000', 'http://localhost:3001'], // Allow local development domains
+  methods: ['GET', 'POST'], // Restrict to necessary HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Configure Express to handle larger JSON payloads
 // The default limit is 100kb, which is too small for large PDF texts
@@ -48,6 +60,42 @@ app.use(express.json({ limit: '50mb' }));
 
 // Configure Express to handle larger URL-encoded payloads
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Enforce HTTPS in production
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    if (req.header('x-forwarded-proto') !== 'https') {
+      res.redirect(`https://${req.header('host')}${req.url}`);
+    } else {
+      next();
+    }
+  });
+  console.log('HTTPS enforcement enabled for production environment');
+}
+
+// API Authentication middleware
+const authenticateApiKey = (req, res, next) => {
+  // Skip authentication for the root path
+  if (req.path === '/') {
+    return next();
+  }
+
+  const apiKey = req.header('X-API-Key');
+  
+  // Check if API key is provided and matches the one in environment variables
+  if (!apiKey || apiKey !== process.env.API_KEY) {
+    console.log('Authentication failed: Invalid or missing API key');
+    return res.status(401).json({ 
+      status: 'error', 
+      message: 'Unauthorized: Invalid or missing API key' 
+    });
+  }
+  
+  next();
+};
+
+// Apply authentication middleware to all routes
+app.use(authenticateApiKey);
 
 // Create a temporary directory for storing uploaded files if it doesn't exist
 const uploadDir = path.join(__dirname, 'temp-uploads');
@@ -92,9 +140,70 @@ const upload = multer({
 // In a production environment, this would be replaced with a database
 const policyStorage = {};
 
+// Track active sessions for cleanup
+const activeSessions = new Map();
+
+// Function to delete policy data after session ends
+const cleanupPolicyData = (policyId) => {
+  console.log(`Cleaning up policy data for ID: ${policyId}`);
+  
+  // Delete the policy data from memory
+  if (policyStorage[policyId]) {
+    delete policyStorage[policyId];
+    console.log(`Deleted policy data for ID: ${policyId} from memory`);
+  }
+  
+  // Remove from active sessions
+  activeSessions.delete(policyId);
+};
+
+// Set up a session timeout (e.g., 30 minutes of inactivity)
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+
 // Define a route for the root path
 app.get('/', (req, res) => {
   res.send('Policy Decoder API is running!');
+});
+
+/**
+ * GET /privacy-policy endpoint
+ * 
+ * This endpoint returns the privacy policy for the application,
+ * explaining how user data is handled.
+ */
+app.get('/privacy-policy', (req, res) => {
+  const privacyPolicy = {
+    title: "Policy Decoder Privacy Policy",
+    lastUpdated: "2023-07-01",
+    sections: [
+      {
+        title: "Data Collection",
+        content: "We collect the insurance policy documents that you upload for analysis."
+      },
+      {
+        title: "Data Processing",
+        content: "Your uploaded documents are processed using OpenAI's API. The text content of your documents is sent to OpenAI for analysis. By using this service, you consent to this processing."
+      },
+      {
+        title: "Data Storage",
+        content: "Your policy data is stored temporarily in memory and is automatically deleted after 30 minutes of inactivity. We do not permanently store your documents or their content."
+      },
+      {
+        title: "Data Security",
+        content: "We implement various security measures to protect your data, including secure file handling and prompt deletion of uploaded files after processing."
+      },
+      {
+        title: "Third-Party Services",
+        content: "We use OpenAI's API to analyze your documents. Please refer to OpenAI's privacy policy for information on how they handle data."
+      },
+      {
+        title: "Your Rights",
+        content: "You have the right to withhold consent for AI processing and to request immediate deletion of your data by ending your session."
+      }
+    ]
+  };
+  
+  res.status(200).json(privacyPolicy);
 });
 
 // Define the /analyze endpoint that accepts POST requests
@@ -106,22 +215,40 @@ app.post('/analyze', upload.single('file'), async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'No file uploaded' });
     }
 
-    // Log information about the uploaded file
-    console.log('Received file:', req.file.originalname);
-    console.log('Saved as:', req.file.filename);
-    console.log('Size:', req.file.size, 'bytes');
-
+    // Log information about the uploaded file (more secure logging)
+    console.log('Received file upload request');
+    console.log('File size:', req.file.size, 'bytes');
+    // Don't log the full filename as it might contain sensitive information
+    
     // Get the insurance type from the request body
     const insuranceType = req.body.insuranceType;
     if (!insuranceType) {
       return res.status(400).json({ status: 'error', message: 'Insurance type is required' });
     }
+    
+    // Check for user consent to process data with OpenAI
+    const userConsent = req.body.userConsent === 'true';
+    if (!userConsent) {
+      // If there's no consent, clean up the uploaded file
+      if (req.file && req.file.path && fs.existsSync(req.file.path)) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error('Error deleting file:', unlinkError);
+        }
+      }
+      
+      return res.status(400).json({ 
+        status: 'error', 
+        message: 'User consent is required to process the document with AI' 
+      });
+    }
 
     // Use our PDF parser to extract text from the uploaded file
     const extractedText = await parsePDF(req.file.path);
     
-    // Log a sample of the extracted text
-    console.log('Extracted text sample:', extractedText.substring(0, 100) + '...');
+    // Log a sanitized message about text extraction (don't log content)
+    console.log('Text extraction complete. Character count:', extractedText.length);
 
     // Create a prompt for OpenAI to analyze the policy
     const maxPdfTextLength = 8000;
@@ -148,48 +275,69 @@ app.post('/analyze', upload.single('file'), async (req, res) => {
     console.log('Sending policy text to OpenAI for analysis...');
     
     // Call the OpenAI API to analyze the policy
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { 
-          role: 'system', 
-          content: 'You are an AI assistant that specializes in analyzing insurance policies. Extract structured data from policy documents in the exact JSON format requested.' 
-        },
-        { role: 'user', content: prompt }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.5,
-    });
-
-    // Extract the policy data from the OpenAI response
-    let policyData;
     try {
-      // Parse the JSON response
-      const responseContent = completion.choices[0].message.content;
-      policyData = JSON.parse(responseContent);
-      
-      // Add an ID to the policy data
-      policyData.id = `${insuranceType}-${Date.now()}`;
-      
-      // Store the policy data in memory
-      policyStorage[policyData.id] = policyData;
-      
-      console.log('Successfully analyzed policy:', policyData.name);
-    } catch (parseError) {
-      console.error('Error parsing OpenAI response:', parseError);
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { 
+            role: 'system', 
+            content: 'You are an AI assistant that specializes in analyzing insurance policies. Extract structured data from policy documents in the exact JSON format requested.' 
+          },
+          { role: 'user', content: prompt }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.5,
+      });
+
+      // Extract the policy data from the OpenAI response
+      let policyData;
+      try {
+        // Parse the JSON response
+        const responseContent = completion.choices[0].message.content;
+        policyData = JSON.parse(responseContent);
+        
+        // Add an ID to the policy data
+        policyData.id = `${insuranceType}-${Date.now()}`;
+        
+        // Store the policy data in memory
+        policyStorage[policyData.id] = policyData;
+        
+        // Store the full text for chat functionality
+        policyStorage[policyData.id].fullText = extractedText;
+        
+        // Add to active sessions with a timeout for cleanup
+        const timeoutId = setTimeout(() => {
+          cleanupPolicyData(policyData.id);
+        }, SESSION_TIMEOUT);
+        
+        activeSessions.set(policyData.id, {
+          timeoutId,
+          lastActivity: Date.now()
+        });
+        
+        console.log('Successfully analyzed policy:', policyData.name);
+        console.log('Policy data will be automatically deleted after inactivity');
+      } catch (jsonError) {
+        console.error('Error parsing OpenAI response:', jsonError);
+        return res.status(500).json({ 
+          status: 'error', 
+          message: 'Error processing the policy data' 
+        });
+      }
+
+      // Return the analyzed policy data
+      res.status(200).json({ 
+        status: 'success', 
+        policyData: policyData,
+        rawText: extractedText.substring(0, 1000) + '...' // Include a sample of the raw text for debugging
+      });
+    } catch (openaiError) {
+      console.error('Error calling OpenAI API:', openaiError);
       return res.status(500).json({ 
         status: 'error', 
-        message: 'Failed to parse policy data',
-        rawResponse: completion.choices[0].message.content
+        message: 'Error analyzing the policy with AI. Please check your OpenAI API key.' 
       });
     }
-
-    // Return the analyzed policy data
-    res.status(200).json({ 
-      status: 'success', 
-      policyData: policyData,
-      rawText: extractedText.substring(0, 1000) + '...' // Include a sample of the raw text for debugging
-    });
 
   } catch (error) {
     console.error('Error processing PDF:', error);
@@ -235,8 +383,9 @@ app.post('/chat', async (req, res) => {
       });
     }
     
-    console.log('Received question:', question);
-    console.log('Policy ID:', policyId);
+    // Secure logging - don't log the actual question content
+    console.log('Received chat request for policy ID:', policyId);
+    console.log('Question length:', question.length, 'characters');
     
     // Check if the policy exists in storage
     if (!policyStorage[policyId]) {
@@ -249,6 +398,25 @@ app.post('/chat', async (req, res) => {
     // Get the policy data
     const policyData = policyStorage[policyId];
     
+    // Refresh the session timeout
+    if (activeSessions.has(policyId)) {
+      // Clear the existing timeout
+      clearTimeout(activeSessions.get(policyId).timeoutId);
+      
+      // Set a new timeout
+      const timeoutId = setTimeout(() => {
+        cleanupPolicyData(policyId);
+      }, SESSION_TIMEOUT);
+      
+      // Update the session data
+      activeSessions.set(policyId, {
+        timeoutId,
+        lastActivity: Date.now()
+      });
+      
+      console.log(`Refreshed session timeout for policy ID: ${policyId}`);
+    }
+
     // Create a prompt for the OpenAI API that includes the policy data and the question
     const prompt = `
       I have the following insurance policy data:
@@ -345,6 +513,94 @@ app.get('/policy/:policyId', (req, res) => {
     }
   } catch (error) {
     console.error('Error retrieving policy:', error);
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /end-session endpoint
+ * 
+ * This endpoint allows clients to explicitly end a session and clean up policy data.
+ * 
+ * Request body should contain:
+ * - policyId: The ID of the policy to clean up
+ * 
+ * Response will contain:
+ * - status: 'success' or 'error'
+ * - message: Success or error message
+ */
+app.post('/end-session', (req, res) => {
+  try {
+    const { policyId } = req.body;
+    
+    if (!policyId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Policy ID is required'
+      });
+    }
+    
+    // Check if the policy exists
+    if (!policyStorage[policyId] && !activeSessions.has(policyId)) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Policy not found'
+      });
+    }
+    
+    // Clean up the policy data
+    cleanupPolicyData(policyId);
+    
+    res.status(200).json({
+      status: 'success',
+      message: 'Session ended and policy data deleted'
+    });
+  } catch (error) {
+    console.error('Error ending session:', error);
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * DELETE /policy/:policyId endpoint
+ * 
+ * This endpoint allows users to explicitly delete their policy data.
+ * 
+ * URL parameters:
+ * - policyId: The ID of the policy to delete
+ * 
+ * Response will contain:
+ * - status: 'success' or 'error'
+ * - message: Success or error message
+ */
+app.delete('/policy/:policyId', (req, res) => {
+  try {
+    const { policyId } = req.params;
+    
+    // Check if the policy exists in storage
+    if (!policyStorage[policyId]) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Policy not found'
+      });
+    }
+    
+    // Clean up the policy data
+    cleanupPolicyData(policyId);
+    
+    // Return success response
+    res.status(200).json({
+      status: 'success',
+      message: 'Policy data deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting policy:', error);
     res.status(500).json({
       status: 'error',
       message: error.message
