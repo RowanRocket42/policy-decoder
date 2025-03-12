@@ -42,7 +42,7 @@ const app = express();
 
 // Define the port to run the server on
 // We're using the PORT from the .env file, or 3002 as a fallback
-const PORT = process.env.PORT || 3002;
+const PORT = 3002;
 
 // Enable CORS - this allows our frontend (running on a different port) to communicate with the backend
 // Update CORS configuration to restrict access to specific origins
@@ -51,7 +51,7 @@ app.use(cors({
     ? ['https://your-production-domain.com'] // Restrict to specific domains in production
     : ['http://localhost:3000', 'http://localhost:3001'], // Allow local development domains
   methods: ['GET', 'POST'], // Restrict to necessary HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key']
 }));
 
 // Configure Express to handle larger JSON payloads
@@ -165,6 +165,16 @@ app.get('/', (req, res) => {
   res.send('Policy Decoder API is running!');
 });
 
+// Add a test endpoint
+app.get('/test', (req, res) => {
+  res.status(200).json({ 
+    status: 'success', 
+    message: 'Test endpoint is working!',
+    tempUploadsExists: fs.existsSync(uploadDir),
+    tempUploadsPath: uploadDir
+  });
+});
+
 /**
  * GET /privacy-policy endpoint
  * 
@@ -212,12 +222,15 @@ app.post('/analyze', upload.single('file'), async (req, res) => {
   try {
     // Check if a file was provided
     if (!req.file) {
+      console.error('Error: No file uploaded');
       return res.status(400).json({ status: 'error', message: 'No file uploaded' });
     }
 
     // Log information about the uploaded file (more secure logging)
     console.log('Received file upload request');
     console.log('File size:', req.file.size, 'bytes');
+    console.log('File path:', req.file.path);
+    console.log('File mimetype:', req.file.mimetype);
     // Don't log the full filename as it might contain sensitive information
     
     // Get the insurance type from the request body
@@ -341,6 +354,7 @@ app.post('/analyze', upload.single('file'), async (req, res) => {
 
   } catch (error) {
     console.error('Error processing PDF:', error);
+    console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
     
     // If there was an error, try to clean up the file if it exists
     if (req.file && req.file.path && fs.existsSync(req.file.path)) {
@@ -608,6 +622,90 @@ app.delete('/policy/:policyId', (req, res) => {
   }
 });
 
+/**
+ * POST /summarize endpoint
+ * 
+ * This endpoint accepts policy text and a prompt, then uses OpenAI's GPT model
+ * to generate a summary of the policy based on the provided prompt.
+ * 
+ * Request body should contain:
+ * - policyText: The text content of the policy to summarize
+ * - prompt: The prompt to use for generating the summary
+ * 
+ * Response will contain:
+ * - status: 'success' or 'error'
+ * - summary: The generated summary
+ * - message: Error message if applicable
+ */
+app.post('/summarize', async (req, res) => {
+  try {
+    // Extract policy text and prompt from the request body
+    const { policyText, prompt } = req.body;
+    
+    // Validate that both policy text and prompt are provided
+    if (!policyText || !prompt) {
+      return res.status(400).json({ 
+        status: 'error', 
+        message: 'Both policyText and prompt are required' 
+      });
+    }
+    
+    // Log a sanitized message (don't log the actual content)
+    console.log('Received summarize request');
+    console.log('Policy text length:', policyText.length, 'characters');
+    console.log('Prompt length:', prompt.length, 'characters');
+    
+    // Limit the policy text length to avoid API issues
+    const maxPolicyTextLength = 10000;
+    const truncatedPolicyText = policyText.substring(0, maxPolicyTextLength);
+    
+    // Create the full prompt for OpenAI
+    const fullPrompt = `
+      ${prompt}
+      
+      Here is the insurance policy text to summarize:
+      
+      ${truncatedPolicyText}
+      
+      ${policyText.length > maxPolicyTextLength ? '... [text truncated due to length] ...' : ''}
+    `;
+    
+    console.log('Sending policy text to OpenAI for summarization...');
+    
+    // Call the OpenAI API to generate a summary
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { 
+          role: 'system', 
+          content: 'You are a professional insurance policy summarizer that creates clear, concise summaries of insurance policies.' 
+        },
+        { role: 'user', content: fullPrompt }
+      ],
+      max_tokens: 500,
+      temperature: 0.5,
+    });
+    
+    // Extract the summary from the OpenAI response
+    const summary = completion.choices[0].message.content;
+    
+    console.log('Generated summary for policy');
+    
+    // Return the summary
+    res.status(200).json({
+      status: 'success',
+      summary: summary
+    });
+    
+  } catch (error) {
+    console.error('Error processing summarize request:', error);
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -618,7 +716,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`Visit http://localhost:${PORT} to test the API`);
 });

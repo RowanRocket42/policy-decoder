@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PDF Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test PDF Upload</h1>
+    <form id="uploadForm">
+        <div class="form-group">
+            <label for="pdfFile">Select PDF File:</label>
+            <input type="file" id="pdfFile" accept="application/pdf" required>
+        </div>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="consent" required>
+                I consent to processing this document
+            </label>
+        </div>
+        <button type="submit">Upload PDF</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = 'Uploading...';
+            
+            const fileInput = document.getElementById('pdfFile');
+            const consentInput = document.getElementById('consent');
+            
+            if (!fileInput.files[0]) {
+                resultDiv.textContent = 'Please select a file';
+                return;
+            }
+            
+            if (!consentInput.checked) {
+                resultDiv.textContent = 'Please consent to processing';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('insuranceType', 'general');
+            formData.append('userConsent', 'true');
+            
+            try {
+                const response = await fetch('http://localhost:3002/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'X-API-Key': 'policy_decoder_api_key_12345'
+                    },
+                    body: formData
+                });
+                
+                const responseText = await response.text();
+                
+                resultDiv.textContent = `Status: ${response.status}\n\n${responseText}`;
+                
+                if (response.ok) {
+                    try {
+                        const data = JSON.parse(responseText);
+                        if (data.status === 'success') {
+                            resultDiv.textContent += '\n\nUpload successful!';
+                        }
+                    } catch (e) {
+                        resultDiv.textContent += '\n\nError parsing JSON response';
+                    }
+                }
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html> 

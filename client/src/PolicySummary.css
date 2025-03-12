@@ -1,215 +1,400 @@
-/* PolicySummary.css - Styles for the policy summary display */
+/* PolicySummary.css - Styles for the Policy Summary page */
+
+/* Import Google Fonts - Inter for modern, clean typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* 
- * Main container for the policy summary
+ * Global styles and variables - using the same as HomePage.css
  */
-.policy-summary-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 32px;
-  background-color: #121212;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+:root {
+  --primary-color: #00A86B;       /* Jade Green */
+  --primary-dark: #008755;        /* Darker Jade Green for hover states */
+  --primary-light: #E0F5EE;       /* Light Jade Green for backgrounds */
+  --accent-color: #ff6b6b;        /* Accent color for highlights */
+  --success-color: #4caf50;       /* Green for success states */
+  --warning-color: #ff9800;       /* Orange for warnings */
+  --text-dark: #e4e4e4;           /* Light gray for primary text in dark mode */
+  --text-medium: #b0b0b0;         /* Medium gray for secondary text in dark mode */
+  --text-light: #8a8a8a;          /* Dark gray for tertiary text in dark mode */
+  --background-color: #121212;    /* Dark background */
+  --background-alt: #121212;      /* Same as background color for consistency */
+  --card-background: #1e1e2e;     /* Dark card background */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for dark mode */
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25); /* Medium shadow for dark mode */
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3); /* Large shadow for dark mode */
+  --border-radius-sm: 8px;        /* Small border radius */
+  --border-radius-md: 12px;       /* Medium border radius */
+  --border-radius-lg: 20px;       /* Large border radius */
+  --border-radius-full: 9999px;   /* Full rounded corners */
+  --spacing-xs: 8px;              /* Extra small spacing */
+  --spacing-sm: 16px;             /* Small spacing */
+  --spacing-md: 24px;             /* Medium spacing */
+  --spacing-lg: 32px;             /* Large spacing */
+  --spacing-xl: 48px;             /* Extra large spacing */
+  --spacing-xxl: 64px;            /* Extra extra large spacing */
+  --transition-fast: 0.2s;        /* Fast transitions */
+  --transition-normal: 0.3s;      /* Normal transitions */
+  --container-width: 90%;         /* Container width as percentage of viewport */
+  --container-max-width: 1200px;  /* Maximum container width */
+  --header-height: 70px;          /* Fixed header height */
 }
 
 /* 
- * Policy header section
+ * Base styles
  */
-.policy-header {
-  text-align: center;
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #383850;
-  background-color: #121212;
-}
-
-/* 
- * Policy title
- */
-.policy-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #00A86B;
-  margin: 0 0 8px;
-}
-
-/* 
- * Policy subtitle (insurance type)
- */
-.policy-subtitle {
-  font-size: 18px;
-  color: #b0b0b0;
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   margin: 0;
+  padding: 0;
+  color: var(--text-dark);
+  background-color: var(--background-color);
+  line-height: 1.6;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: auto;
+  min-height: 100%;
+  width: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* 
- * Policy content container
+ * Data Protection page container
  */
-.policy-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 24px;
+.data-protection-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--background-color);
+  overflow-y: auto;
+  position: relative;
 }
 
 /* 
- * Individual policy section
+ * Modern header - same as other pages
  */
-.policy-section {
-  margin-bottom: 32px;
+.modern-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--spacing-lg);
+  height: var(--header-height);
   background-color: #121212;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
 }
 
 /* 
- * Section title with icon
+ * Logo
  */
-.section-title {
+.logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: -0.5px;
+  cursor: pointer;
   display: flex;
   align-items: center;
+}
+
+/* 
+ * Header logo
+ */
+.header-logo {
+  height: 40px;
+  width: auto;
+  margin-right: var(--spacing-xs);
+}
+
+/* 
+ * Main navigation
+ */
+.main-nav {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+/* 
+ * Navigation links
+ */
+.main-nav a {
+  color: var(--text-dark);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  transition: color var(--transition-fast);
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+/* 
+ * Navigation link hover state
+ */
+.main-nav a:hover {
+  color: var(--primary-color);
+}
+
+/* 
+ * Data Protection section
+ */
+.data-protection-section {
+  padding: var(--spacing-xl) 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: var(--background-color);
+  min-height: calc(100vh - var(--header-height) - 300px); /* Adjust for header and footer */
+}
+
+/* 
+ * Data Protection container
+ */
+.data-protection-container {
+  width: var(--container-width);
+  max-width: var(--container-max-width);
+  padding: var(--spacing-lg);
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+/* 
+ * Data Protection title
+ */
+.data-protection-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-md);
+  text-align: center;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+/* 
+ * Data Protection tagline
+ */
+.data-protection-tagline {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--text-medium);
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 
+ * Data Protection content
+ */
+.data-protection-content {
+  margin-top: var(--spacing-lg);
+}
+
+/* 
+ * Section heading
+ */
+.section-heading {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 2px solid var(--primary-color);
+  display: inline-block;
+}
+
+/* 
+ * Policy Summary specific styles
+ */
+.policy-summary-content {
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.policy-summary-box {
+  display: flex;
+  background-color: rgba(0, 168, 107, 0.1);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  border-left: 4px solid var(--primary-color);
+}
+
+.policy-summary-icon {
+  margin-right: var(--spacing-md);
+  color: var(--primary-color);
+  display: flex;
+  align-items: flex-start;
+  padding-top: var(--spacing-xs);
+}
+
+.policy-summary-text {
+  flex: 1;
+}
+
+.policy-summary-text h3 {
   font-size: 20px;
   font-weight: 600;
-  color: #333333;
-  margin: 0 0 16px;
+  color: var(--text-dark);
+  margin-top: 0;
+  margin-bottom: var(--spacing-sm);
 }
 
-/* 
- * Icon in section title
- */
-.icon {
-  margin-right: 8px;
-  font-size: 24px;
-}
-
-/* 
- * List of items
- */
-.item-list {
-  list-style-type: none;
-  padding: 0;
+.policy-summary-text p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-medium);
   margin: 0;
 }
 
 /* 
- * Individual list item
+ * Chat with policy section
  */
-.item-list li {
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+.chat-with-policy-section {
+  margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.chat-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-md);
+}
+
+.chat-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-full);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.chat-button:hover {
+  background-color: var(--primary-dark);
 }
 
 /* 
- * Covered item styling
+ * Back button
  */
-.covered-item {
-  color: #4caf50;
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background-color: transparent;
+  color: var(--text-medium);
+  border: 1px solid var(--text-light);
+  border-radius: var(--border-radius-full);
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-bottom: var(--spacing-md);
+}
+
+.back-button:hover {
+  color: var(--text-dark);
+  border-color: var(--text-dark);
 }
 
 /* 
- * Not covered item styling
+ * Info box
  */
-.not-covered-item {
-  color: #f44336;
+.info-box {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-xl);
+}
+
+.info-box h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
 }
 
 /* 
- * Limit/condition item styling
+ * Data handling steps
  */
-.limit-item {
-  color: #ff9800;
+.data-handling-steps {
+  padding-left: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.data-handling-steps li {
+  margin-bottom: var(--spacing-sm);
+}
+
+.data-handling-steps strong {
+  color: var(--primary-color);
+  font-weight: 600;
 }
 
 /* 
- * Contact section styling
+ * Data protection conclusion
  */
-.contact-section {
-  margin-top: 40px;
-  padding: 24px;
-  border-radius: 8px;
-  background-color: #121212;
-  border: 1px solid #383850;
+.data-protection-conclusion {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* 
- * Contact information container
- */
-.contact-info {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+.data-protection-conclusion p {
+  color: var(--text-medium);
+  margin-bottom: var(--spacing-md);
 }
 
-/* 
- * Contact information paragraph
- */
-.contact-info p {
-  margin: 0;
-  color: #666666;
+.data-protection-conclusion p:last-child {
+  margin-bottom: 0;
 }
 
-/* 
- * Contact information links
- */
-.contact-info a {
-  color: #2a7de1;
+.data-protection-conclusion a {
+  color: var(--primary-color);
   text-decoration: none;
+  transition: color var(--transition-fast);
 }
 
-.contact-info a:hover {
+.data-protection-conclusion a:hover {
+  color: var(--primary-dark);
   text-decoration: underline;
 }
 
 /* 
- * Ask question container
- */
-.ask-question-container {
-  margin-top: 32px;
-  text-align: center;
-  background-color: #121212;
-}
-
-/* 
- * Ask question button
- */
-.ask-question-button {
-  background-color: #2a7de1;
-  color: #ffffff;
-  border: none;
-  border-radius: 50px;
-  padding: 16px 32px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
-  box-shadow: 0 4px 12px rgba(42, 125, 225, 0.2);
-}
-
-.ask-question-button:hover {
-  background-color: #1a6fd3;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(42, 125, 225, 0.3);
-}
-
-/* 
- * Loading state
+ * Loading and error states
  */
 .policy-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 64px 0;
+  padding: var(--spacing-xl);
+  text-align: center;
 }
 
-/* 
- * Loading spinner
- */
 .loading-spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid #e0e0e0;
-  border-top: 4px solid #2a7de1;
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(0, 168, 107, 0.1);
   border-radius: 50%;
+  border-top: 4px solid var(--primary-color);
   animation: spin 1s linear infinite;
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-md);
 }
 
 @keyframes spin {
@@ -217,46 +402,237 @@
   100% { transform: rotate(360deg); }
 }
 
+.policy-error {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--accent-color);
+}
+
+/* 
+ * Modern footer
+ */
+.modern-footer {
+  background-color: #1a1a1a;
+  padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-lg);
+  margin-top: auto;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  flex-wrap: wrap;
+  gap: var(--spacing-xl);
+}
+
+.footer-brand {
+  flex: 1;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.footer-logo {
+  margin-bottom: var(--spacing-sm);
+  cursor: pointer;
+}
+
+.footer-logo-img {
+  height: 40px;
+  width: auto;
+}
+
+.footer-tagline {
+  color: var(--text-medium);
+  font-size: 14px;
+  margin-top: var(--spacing-xs);
+}
+
+.footer-links {
+  display: flex;
+  gap: var(--spacing-xl);
+  flex-wrap: wrap;
+}
+
+.footer-column {
+  min-width: 120px;
+}
+
+.footer-column h4 {
+  color: var(--text-dark);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+}
+
+.footer-column a {
+  display: block;
+  color: var(--text-medium);
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: var(--spacing-xs);
+  transition: color var(--transition-fast);
+}
+
+.footer-column a:hover {
+  color: var(--primary-color);
+}
+
+.footer-bottom {
+  max-width: var(--container-max-width);
+  margin: var(--spacing-xl) auto 0;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.footer-bottom p {
+  color: var(--text-light);
+  font-size: 12px;
+  margin: 0;
+}
+
 /* 
  * Responsive styles
  */
-@media (max-width: 768px) {
-  .policy-summary-container {
-    padding: 24px;
+@media (max-width: 1024px) {
+  :root {
+    --container-width: 95%;
   }
   
-  .policy-content {
-    grid-template-columns: 1fr;
+  .data-protection-title {
+    font-size: 32px;
   }
   
-  .policy-title {
-    font-size: 24px;
-  }
-  
-  .policy-subtitle {
+  .data-protection-tagline {
     font-size: 16px;
   }
   
-  .section-title {
-    font-size: 18px;
+  .policy-summary-box {
+    flex-direction: column;
   }
   
-  .contact-info {
-    grid-template-columns: 1fr;
+  .policy-summary-icon {
+    margin-right: 0;
+    margin-bottom: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --spacing-xl: 32px;
+    --spacing-xxl: 48px;
+  }
+  
+  .modern-header {
+    padding: 0 var(--spacing-md);
+  }
+  
+  .main-nav {
+    gap: var(--spacing-sm);
+  }
+  
+  .main-nav a {
+    font-size: 14px;
+    padding: var(--spacing-xs);
+  }
+  
+  .data-protection-title {
+    font-size: 28px;
+  }
+  
+  .data-protection-tagline {
+    font-size: 15px;
+  }
+  
+  .section-heading {
+    font-size: 22px;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+  
+  .footer-brand {
+    max-width: 100%;
+  }
+  
+  .footer-links {
+    width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .policy-summary-container {
-    padding: 16px;
+  :root {
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --container-width: 100%;
+    --border-radius-md: 8px;
   }
   
-  .policy-title {
+  .modern-header {
+    padding: 0 var(--spacing-sm);
+    height: 60px;
+    flex-wrap: wrap;
+  }
+  
+  .main-nav {
+    display: none;
+  }
+  
+  .data-protection-section {
+    padding: var(--spacing-lg) 0;
+  }
+  
+  .data-protection-container {
+    padding: var(--spacing-md);
+    border-radius: 0;
+  }
+  
+  .data-protection-title {
+    font-size: 24px;
+  }
+  
+  .data-protection-tagline {
+    font-size: 14px;
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .section-heading {
     font-size: 20px;
   }
   
-  .ask-question-button {
-    padding: 12px 24px;
+  .policy-summary-text h3 {
+    font-size: 18px;
+  }
+  
+  .policy-summary-text p {
     font-size: 14px;
+  }
+  
+  .info-box {
+    padding: var(--spacing-md);
+  }
+  
+  .data-handling-steps {
+    padding-left: var(--spacing-md);
+  }
+  
+  .footer-links {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+  
+  .footer-column {
+    width: 100%;
+  }
+  
+  .footer-logo-img {
+    height: 30px;
+  }
+  
+  .footer-tagline {
+    font-size: 12px;
   }
 } 

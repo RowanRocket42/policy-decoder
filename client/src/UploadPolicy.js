@@ -117,20 +117,50 @@ function UploadPolicy() {
       // Create form data for the file upload
       const formData = new FormData();
       formData.append('file', selectedFile);
+      formData.append('insuranceType', 'general');
+      formData.append('userConsent', 'true');
       
-      // For demo purposes, we'll simulate a successful upload
-      // In a real application, you would send the file to your server
-      setTimeout(() => {
-        // Generate a policy ID based on the current timestamp
-        const policyId = `policy-${Date.now()}`;
-        
+      // Get the API URL and key from environment variables or use defaults
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const apiKey = process.env.REACT_APP_API_KEY || 'policy_decoder_api_key_12345';
+      
+      console.log('Uploading file to:', `${apiUrl}/analyze`);
+      console.log('API Key:', apiKey);
+      console.log('File name:', selectedFile.name);
+      console.log('File size:', selectedFile.size);
+      console.log('File type:', selectedFile.type);
+      
+      // Send the file to the server
+      const response = await fetch(`${apiUrl}/analyze`, {
+        method: 'POST',
+        headers: {
+          'X-API-Key': apiKey
+        },
+        body: formData
+      });
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', [...response.headers.entries()]);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response:', response.status, errorText);
+        throw new Error(`Server error: ${response.status} - ${errorText || 'Failed to upload file'}`);
+      }
+      
+      const data = await response.json();
+      console.log('Response data:', data);
+      
+      if (data.status === 'success' && data.policyData) {
         // Navigate to the policy summary page with the policy ID
-        navigate(`/policy-summary/${policyId}`);
-      }, 2000);
-      
+        navigate(`/policy-summary/${data.policyData.id}`);
+      } else {
+        console.error('API response error:', data);
+        throw new Error(data.message || 'Failed to process file');
+      }
     } catch (error) {
       console.error('Error uploading file:', error);
-      setErrorMessage('Failed to upload file. Please try again.');
+      setErrorMessage(`Upload failed: ${error.message}`);
       setIsUploading(false);
     }
   };
