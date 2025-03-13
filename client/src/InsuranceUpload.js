@@ -163,6 +163,7 @@ function InsuranceUpload() {
     try {
       // Set loading state to true to show loading indicator
       setIsLoading(true);
+      setMessage(''); // Clear any previous messages
       
       // Create a FormData object to send the file
       const formData = new FormData();
@@ -174,12 +175,20 @@ function InsuranceUpload() {
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
       const apiKey = process.env.REACT_APP_API_KEY;
       
+      console.log('Uploading file to:', `${apiUrl}/analyze`);
+      console.log('API Key present:', apiKey ? 'Yes' : 'No');
+      console.log('File name:', fileToUpload.name);
+      console.log('File size:', fileToUpload.size, 'bytes');
+      console.log('File type:', fileToUpload.type);
+      
       // Create headers object
       const headers = {};
       
       // Add API key to headers if available
       if (apiKey) {
         headers['X-API-Key'] = apiKey;
+      } else {
+        console.warn('API key is missing. Authentication may fail.');
       }
 
       // Send the file to the server for analysis
@@ -189,11 +198,30 @@ function InsuranceUpload() {
         body: formData,
       });
 
-      // Parse the JSON response from the server
-      const data = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response headers:', [...response.headers.entries()]);
       
-      // Log the response data for debugging
-      console.log('Server response:', data);
+      if (!response.ok) {
+        let errorMessage = 'Failed to upload file';
+        try {
+          const errorText = await response.text();
+          console.error('Server error response:', errorText);
+          errorMessage = `Server error: ${response.status} - ${errorText || 'Failed to upload file'}`;
+        } catch (textError) {
+          console.error('Error reading response text:', textError);
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Parse the JSON response from the server
+      let data;
+      try {
+        data = await response.json();
+        console.log('Response data:', data);
+      } catch (jsonError) {
+        console.error('Error parsing JSON response:', jsonError);
+        throw new Error('Invalid response from server');
+      }
       
       // Check if the response was successful
       if (data.status === 'success' && data.policyData) {
@@ -208,22 +236,8 @@ function InsuranceUpload() {
       }
     } catch (error) {
       // Handle any errors that occur during the fetch operation
-      console.error('Error uploading file:', error);
-      
-      // Check if it's an authentication error
-      if (error.message && error.message.includes('401')) {
-        setMessage('Authentication failed. Please check API key configuration.');
-        console.error('API Key authentication failed');
-      } else {
-        // Use mock data as a fallback when the server call fails
-        console.log('Using mock data as fallback');
-        const mockData = getMockPolicyData(insuranceType, fileToUpload.name);
-        setPolicyData(mockData);
-        setIsAnalyzed(true);
-        
-        // Still show an error message to inform the user
-        setMessage('Connected to server failed, using demo data instead.');
-      }
+      console.error('Upload error:', error);
+      setMessage(`Upload failed: ${error.message}`);
     } finally {
       // Set loading state back to false when done
       setIsLoading(false);

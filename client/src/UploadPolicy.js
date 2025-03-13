@@ -112,6 +112,7 @@ function UploadPolicy() {
     
     // Set uploading state
     setIsUploading(true);
+    setErrorMessage(''); // Clear any previous error messages
     
     try {
       // Create form data for the file upload
@@ -124,10 +125,16 @@ function UploadPolicy() {
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
       const apiKey = process.env.REACT_APP_API_KEY || 'policy_decoder_api_key_12345';
       
-      console.log('Uploading file to:', `${apiUrl}/analyze`);
+      console.log('Environment variables:');
+      console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+      console.log('REACT_APP_API_KEY:', process.env.REACT_APP_API_KEY);
+      
+      console.log('Using values:');
+      console.log('API URL:', apiUrl);
       console.log('API Key:', apiKey);
+      console.log('Uploading file to:', `${apiUrl}/analyze`);
       console.log('File name:', selectedFile.name);
-      console.log('File size:', selectedFile.size);
+      console.log('File size:', selectedFile.size, 'bytes');
       console.log('File type:', selectedFile.type);
       
       // Send the file to the server
@@ -143,13 +150,25 @@ function UploadPolicy() {
       console.log('Response headers:', [...response.headers.entries()]);
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Server response:', response.status, errorText);
-        throw new Error(`Server error: ${response.status} - ${errorText || 'Failed to upload file'}`);
+        let errorMessage = 'Failed to upload file';
+        try {
+          const errorText = await response.text();
+          console.error('Server error response:', errorText);
+          errorMessage = `Server error: ${response.status} - ${errorText || 'Failed to upload file'}`;
+        } catch (textError) {
+          console.error('Error reading response text:', textError);
+        }
+        throw new Error(errorMessage);
       }
       
-      const data = await response.json();
-      console.log('Response data:', data);
+      let data;
+      try {
+        data = await response.json();
+        console.log('Response data:', data);
+      } catch (jsonError) {
+        console.error('Error parsing JSON response:', jsonError);
+        throw new Error('Invalid response from server');
+      }
       
       if (data.status === 'success' && data.policyData) {
         // Navigate to the policy summary page with the policy ID
@@ -159,8 +178,9 @@ function UploadPolicy() {
         throw new Error(data.message || 'Failed to process file');
       }
     } catch (error) {
-      console.error('Error uploading file:', error);
+      console.error('Upload error:', error);
       setErrorMessage(`Upload failed: ${error.message}`);
+    } finally {
       setIsUploading(false);
     }
   };

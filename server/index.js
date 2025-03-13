@@ -22,6 +22,9 @@ require('dotenv').config();
 // This library provides a simple interface to the OpenAI API
 const OpenAI = require('openai');
 
+// Import our custom session manager
+const sessionManager = require('./sessionManager');
+
 // Create an instance of the OpenAI client with your API key from environment variables
 // Environment variables help keep sensitive data like API keys out of your code
 const openai = new OpenAI({
@@ -41,17 +44,17 @@ const { parsePDF } = require('./parser');
 const app = express();
 
 // Define the port to run the server on
-// We're using the PORT from the .env file, or 3002 as a fallback
-const PORT = 3002;
+// We're using the PORT from the .env file, or 8000 as a fallback
+const PORT = process.env.PORT || 8000;
 
 // Enable CORS - this allows our frontend (running on a different port) to communicate with the backend
-// Update CORS configuration to restrict access to specific origins
+// Update CORS configuration to be more permissive for development
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-production-domain.com'] // Restrict to specific domains in production
-    : ['http://localhost:3000', 'http://localhost:3001'], // Allow local development domains
-  methods: ['GET', 'POST'], // Restrict to necessary HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key']
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'X-API-Key']
 }));
 
 // Configure Express to handle larger JSON payloads
@@ -81,9 +84,15 @@ const authenticateApiKey = (req, res, next) => {
   }
 
   const apiKey = req.header('X-API-Key');
+  const expectedApiKey = process.env.API_KEY;
+  
+  console.log('Request path:', req.path);
+  console.log('API Key provided:', apiKey ? 'Yes' : 'No');
+  console.log('Expected API Key:', expectedApiKey);
+  console.log('API Keys match:', apiKey === expectedApiKey);
   
   // Check if API key is provided and matches the one in environment variables
-  if (!apiKey || apiKey !== process.env.API_KEY) {
+  if (!apiKey || apiKey !== expectedApiKey) {
     console.log('Authentication failed: Invalid or missing API key');
     return res.status(401).json({ 
       status: 'error', 
@@ -103,62 +112,82 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Configure multer storage
-// Multer is middleware that handles file uploads
+// Configure multer for file uploads
+// Set up storage for uploaded files
 const storage = multer.diskStorage({
-  // Set the destination where files will be saved
   destination: function(req, file, cb) {
+    // Create the upload directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
     cb(null, uploadDir);
   },
-  // Set the filename - here we're using the original filename
   filename: function(req, file, cb) {
-    // Create a unique filename using timestamp to avoid overwriting files
-    const uniqueFilename = Date.now() + '-' + file.originalname;
-    cb(null, uniqueFilename);
+    // Generate a secure filename to prevent path traversal attacks
+    const secureFilename = Date.now() + '-' + Math.round(Math.random() * 1E9) + '.pdf';
+    cb(null, secureFilename);
   }
 });
 
-// Create a multer instance with our storage configuration
-// This will be used as middleware for handling file uploads
-const upload = multer({ 
+// Create the multer upload instance with size limits
+const upload = multer({
   storage: storage,
-  // File filter to only allow PDFs
+  limits: {
+    fileSize: parseInt(process.env.MAX_UPLOAD_SIZE) || 10 * 1024 * 1024, // 10MB limit from env or default
+    files: 1 // Only allow one file per request
+  },
   fileFilter: function(req, file, cb) {
-    // Check if the file is a PDF
+    // Only accept PDF files
     if (file.mimetype !== 'application/pdf') {
-      return cb(new Error('Only PDF files are allowed!'), false);
+      return cb(new Error('Only PDF files are allowed'));
     }
     cb(null, true);
-  },
-  // Limit file size to 10MB
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB
   }
 });
+
+// Custom error handler for multer
+const uploadMiddleware = (req, res, next) => {
+  upload.single('file')(req, res, function(err) {
+    if (err) {
+      console.error('Multer error:', err);
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ 
+          status: 'error', 
+          message: 'File too large. Maximum size is 10MB.' 
+        });
+      }
+      return res.status(400).json({ 
+        status: 'error', 
+        message: err.message || 'Error uploading file' 
+      });
+    }
+    next();
+  });
+};
 
 // In-memory storage for policy data
 // In a production environment, this would be replaced with a database
-const policyStorage = {};
+// const policyStorage = {};
 
 // Track active sessions for cleanup
-const activeSessions = new Map();
+// const activeSessions = new Map();
 
 // Function to delete policy data after session ends
-const cleanupPolicyData = (policyId) => {
-  console.log(`Cleaning up policy data for ID: ${policyId}`);
-  
-  // Delete the policy data from memory
-  if (policyStorage[policyId]) {
-    delete policyStorage[policyId];
-    console.log(`Deleted policy data for ID: ${policyId} from memory`);
-  }
-  
-  // Remove from active sessions
-  activeSessions.delete(policyId);
-};
+// const cleanupPolicyData = (policyId) => {
+//   console.log(`Cleaning up policy data for ID: ${policyId}`);
+//   
+//   // Delete the policy data from memory
+//   if (policyStorage[policyId]) {
+//     delete policyStorage[policyId];
+//     console.log(`Deleted policy data for ID: ${policyId} from memory`);
+//   }
+//   
+//   // Remove from active sessions
+//   activeSessions.delete(policyId);
+// };
 
 // Set up a session timeout (e.g., 30 minutes of inactivity)
-const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+// const SESSION_TIMEOUT = parseInt(process.env.SESSION_TIMEOUT) || 30 * 60 * 1000; // 30 minutes in milliseconds
 
 // Define a route for the root path
 app.get('/', (req, res) => {
@@ -218,7 +247,7 @@ app.get('/privacy-policy', (req, res) => {
 
 // Define the /analyze endpoint that accepts POST requests
 // The 'file' parameter in upload.single() must match the field name in the FormData from the frontend
-app.post('/analyze', upload.single('file'), async (req, res) => {
+app.post('/analyze', uploadMiddleware, async (req, res) => {
   try {
     // Check if a file was provided
     if (!req.file) {
@@ -312,21 +341,11 @@ app.post('/analyze', upload.single('file'), async (req, res) => {
         // Add an ID to the policy data
         policyData.id = `${insuranceType}-${Date.now()}`;
         
-        // Store the policy data in memory
-        policyStorage[policyData.id] = policyData;
-        
         // Store the full text for chat functionality
-        policyStorage[policyData.id].fullText = extractedText;
+        policyData.fullText = extractedText;
         
-        // Add to active sessions with a timeout for cleanup
-        const timeoutId = setTimeout(() => {
-          cleanupPolicyData(policyData.id);
-        }, SESSION_TIMEOUT);
-        
-        activeSessions.set(policyData.id, {
-          timeoutId,
-          lastActivity: Date.now()
-        });
+        // Store the policy data using the session manager
+        sessionManager.storePolicyData(policyData.id, policyData);
         
         console.log('Successfully analyzed policy:', policyData.name);
         console.log('Policy data will be automatically deleted after inactivity');
@@ -401,78 +420,147 @@ app.post('/chat', async (req, res) => {
     console.log('Received chat request for policy ID:', policyId);
     console.log('Question length:', question.length, 'characters');
     
-    // Check if the policy exists in storage
-    if (!policyStorage[policyId]) {
+    // Get the policy data using the session manager
+    const policyData = sessionManager.getPolicyData(policyId);
+    
+    // Check if the policy exists
+    if (!policyData) {
       return res.status(404).json({
         status: 'error',
         message: 'Policy not found'
       });
     }
     
-    // Get the policy data
-    const policyData = policyStorage[policyId];
-    
-    // Refresh the session timeout
-    if (activeSessions.has(policyId)) {
-      // Clear the existing timeout
-      clearTimeout(activeSessions.get(policyId).timeoutId);
-      
-      // Set a new timeout
-      const timeoutId = setTimeout(() => {
-        cleanupPolicyData(policyId);
-      }, SESSION_TIMEOUT);
-      
-      // Update the session data
-      activeSessions.set(policyId, {
-        timeoutId,
-        lastActivity: Date.now()
-      });
-      
-      console.log(`Refreshed session timeout for policy ID: ${policyId}`);
-    }
-
-    // Create a prompt for the OpenAI API that includes the policy data and the question
-    const prompt = `
-      I have the following insurance policy data:
+    // Create a user message that includes the policy data and the question
+    const userMessage = `
+      Here is the insurance policy document information:
       
       Policy Name: ${policyData.name}
       Policy Type: ${policyData.type}
+      Provider: ${policyData.provider || 'Not specified'}
+      
+      Policy Details:
+      ${policyData.fullText ? policyData.fullText.substring(0, 5000) : ''}
       
       What's Covered:
-      ${policyData.covered.map(item => `- ${item}`).join('\n')}
+      ${policyData.covered ? policyData.covered.map(item => `- ${item}`).join('\n') : 'Not specified'}
       
       What's Not Covered:
-      ${policyData.notCovered.map(item => `- ${item}`).join('\n')}
+      ${policyData.notCovered ? policyData.notCovered.map(item => `- ${item}`).join('\n') : 'Not specified'}
       
       Limits & Conditions:
-      ${policyData.limits.map(item => `- ${item}`).join('\n')}
+      ${policyData.limits ? policyData.limits.map(item => `- ${item}`).join('\n') : 'Not specified'}
       
       Contact Information:
+      ${policyData.contact ? `
       - Phone: ${policyData.contact.phone}
       - Email: ${policyData.contact.email}
       - Website: ${policyData.contact.website}
+      ` : 'Not specified'}
       
       Based on this policy information, please answer the following question:
       ${question}
-      
-      Please provide a concise and accurate answer based only on the information provided about this policy.
-      If the information needed to answer the question is not available in the policy data, please state that clearly.
     `;
     
     console.log('Sending question to OpenAI...');
     
+    // The detailed system prompt as provided
+    const systemPrompt = `You are a friendly, conversational insurance assistant chatbot created and powered by the team at Clarifai. Your primary function is to help users understand their personal insurance or medical aid policy clearly based solely on the policy documents (PDF) they've uploaded. You're chatting specifically with customers from South Africa, so keep your insurance knowledge accurate and relevant to South African industry standards, regulations, terminology, and local practices.
+
+🚦 YOUR CORE GUIDELINES & SCOPE OF KNOWLEDGE:
+Policy-Only Answers: ONLY answer based directly on what's explicitly detailed or stated in the uploaded policy document provided by the user.
+
+If it's clearly covered ✅, explicitly tell them it is covered according to their policy in a friendly, conversational way.
+If obviously excluded or restricted ❌ in the policy PDF provided, point it out clearly but with empathy.
+Highlight clearly any limits ⚠️, waiting periods or important special conditions mentioned explicitly.
+Provide relevant contact or claims 📞 information if clearly stated in their PDF.
+Strictly No Assumptions:
+If something asked by a user isn't directly addressed in their policy PDF info you're given, do NOT guess! Politely state clearly:
+"I don't see that clearly explained in your policy document. I'd recommend checking directly with your insurer or advisor to get the most accurate information."
+
+General Insurance Guidance (When Applicable):
+You CAN offer general advice about typical insurance terms or concepts relevant explicitly to SOUTH AFRICA if the user asks a generic question ("What does underwriting mean?" or "Explain what a hospital cash-back plan typically does?"). ALWAYS clarify immediately afterwards: "This is just general info—I'd suggest checking YOUR specific policy document to confirm how it applies to your coverage."
+
+🌍 SOUTH AFRICAN CONTEXT & KNOWLEDGE REQUIRED:
+Make sure you're familiar with these common South African insurance types & concepts clearly (at a minimum):
+
+Medical Aid (Discovery Health, Momentum Health, Bonitas Medical Scheme and others)
+Gap Cover Policies
+Hospital Cash-back Plans
+Life Cover and Funeral Cover Insurance
+Short-term Cover like Car and Household Content Insurance (Outsurance, Santam, King Price)
+Waiting periods, pre-existing conditions clauses (very common locally)
+Prescribed Minimum Benefits (PMB)—specific to SA healthcare environment
+FAIS legislation compliance basics (insurance brokers/advisors legally required transparency)
+Typical terms such as excess/deductible, exclusions/excesses typical in SA
+Specific local terminology ("in-hospital vs out-of-hospital treatments," "chronic medication benefit," "Day-to-Day Benefits," etc.)
+Clearly reflect your accurate understanding of these terms/coverages within answers whenever users ask about general aspects specifically an SA customer might face.
+
+💬 STYLE OF COMMUNICATION WITH USERS:
+Be warm, friendly and conversational while maintaining professionalism. Talk to users as if you're having a friendly chat, using a natural, helpful tone:
+
+Warm and Approachable:
+Use a friendly, conversational tone that makes insurance feel less intimidating. Feel free to use "I" and address the user directly.
+
+For example: "I see your policy covers emergency dental work! That's great news if you ever have an unexpected dental issue."
+
+Clear Simplicity & Transparency:
+Speak plainly—no confusing jargon without clearly explaining first. Answers must be accessible, straightforward and HIGHLY readable.
+
+Human-Centric Empathy:
+Recognize insurance can seem stressful/confusing/inconvenient to real people:
+
+"Insurance terms can feel intimidating—I totally understand that! Let me break this down for you based on what I can see in your document."
+
+Professional Confidence & Boundaries:
+Be helpful but friendly in reminding users of your limitations:
+
+"I want to be super helpful, but I can only explain what's specifically mentioned in your policy document. That way you get the most accurate information!"
+
+Concise Structure for Answers:
+Always structure responses clearly into straightforward points where practical, but maintain a conversational flow:
+
+✅ Covered: "Good news! Your policy does cover..."
+❌ Not Covered: "I should point out that your policy doesn't cover..."
+⚠️ Conditions/limits: "Just so you're aware, there are some conditions..."
+📞 Claims & contact: "If you need to get in touch, here's how..."
+
+Courteous Professionalism for Irrelevant Questions:
+Any off-topic/unrelated light-hearted questions get friendly redirect answers:
+
+"That's an interesting question! I'm actually here specifically to help you understand your insurance policy. Is there anything about your coverage I can help explain?"
+
+If specifically asked who created you or powers you respond directly and briefly as follows:
+"I was built by the team at Clarifai — specialists in clear AI-powered customer experiences. Now, how can I help with your insurance questions today?"
+
+🚩 ADDITIONAL CLEAR PROMPTING GUIDELINES FOR CHATBOT SUCCESS:
+Occasionally ask proactive follow-up prompts in a friendly, conversational way:
+
+"Would you like me to highlight some specific exclusions you should be aware of in your policy?"
+"I noticed your policy mentions hospital treatments - would you like me to explain those limits in more detail?"
+"This type of cover often includes waiting periods - would it be helpful if I explained those for you?"
+
+✅ KEY SUMMARY OF YOUR ROLE & LIMITS CLEARLY RESTATED:
+
+You're a friendly, conversational assistant who helps SA users understand their insurance policies.
+Answer questions based on the policy documents, maintaining a warm, helpful tone.
+Provide documented-based info plus general SA insurance guidance when appropriate.
+Keep a balance between being conversational and professional - be friendly but reliable.
+Use natural language that feels like a helpful friend who happens to know a lot about insurance.
+Bottom line? Be warm, friendly and conversational while providing accurate, helpful information about South African insurance policies!`;
+    
     // Call the OpenAI API to generate a response
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o-mini', // Using the specified model
       messages: [
         { 
           role: 'system', 
-          content: 'You are a helpful insurance assistant that answers questions about insurance policies. Provide accurate, concise answers based only on the policy information provided.' 
+          content: systemPrompt
         },
-        { role: 'user', content: prompt }
+        { role: 'user', content: userMessage }
       ],
-      max_tokens: 500,
-      temperature: 0.7,
+      max_tokens: 1000, // Increased token limit for more detailed responses
+      temperature: 1.0, // Higher temperature for more creative and varied responses
     });
     
     // Extract the answer from the OpenAI response
@@ -513,11 +601,14 @@ app.get('/policy/:policyId', (req, res) => {
   try {
     const { policyId } = req.params;
     
-    // Check if the policy exists in storage
-    if (policyStorage[policyId]) {
+    // Get the policy data using the session manager
+    const policyData = sessionManager.getPolicyData(policyId);
+    
+    // Check if the policy exists
+    if (policyData) {
       res.status(200).json({
         status: 'success',
-        policyData: policyStorage[policyId]
+        policyData: policyData
       });
     } else {
       res.status(404).json({
@@ -557,8 +648,11 @@ app.post('/end-session', (req, res) => {
       });
     }
     
+    // Get the policy data to check if it exists
+    const policyData = sessionManager.getPolicyData(policyId);
+    
     // Check if the policy exists
-    if (!policyStorage[policyId] && !activeSessions.has(policyId)) {
+    if (!policyData) {
       return res.status(404).json({
         status: 'error',
         message: 'Policy not found'
@@ -566,7 +660,7 @@ app.post('/end-session', (req, res) => {
     }
     
     // Clean up the policy data
-    cleanupPolicyData(policyId);
+    sessionManager.cleanupPolicyData(policyId);
     
     res.status(200).json({
       status: 'success',
@@ -597,8 +691,11 @@ app.delete('/policy/:policyId', (req, res) => {
   try {
     const { policyId } = req.params;
     
-    // Check if the policy exists in storage
-    if (!policyStorage[policyId]) {
+    // Get the policy data to check if it exists
+    const policyData = sessionManager.getPolicyData(policyId);
+    
+    // Check if the policy exists
+    if (!policyData) {
       return res.status(404).json({
         status: 'error',
         message: 'Policy not found'
@@ -606,7 +703,7 @@ app.delete('/policy/:policyId', (req, res) => {
     }
     
     // Clean up the policy data
-    cleanupPolicyData(policyId);
+    sessionManager.cleanupPolicyData(policyId);
     
     // Return success response
     res.status(200).json({
@@ -699,6 +796,35 @@ app.post('/summarize', async (req, res) => {
     
   } catch (error) {
     console.error('Error processing summarize request:', error);
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /admin/sessions endpoint
+ * 
+ * This endpoint provides information about active sessions.
+ * It's intended for administrative use and should be secured in production.
+ * 
+ * Response will contain:
+ * - status: 'success' or 'error'
+ * - stats: Session statistics
+ * - message: Error message if applicable
+ */
+app.get('/admin/sessions', (req, res) => {
+  try {
+    // Get session statistics
+    const stats = sessionManager.getSessionStats();
+    
+    res.status(200).json({
+      status: 'success',
+      stats: stats
+    });
+  } catch (error) {
+    console.error('Error getting session statistics:', error);
     res.status(500).json({
       status: 'error',
       message: error.message
