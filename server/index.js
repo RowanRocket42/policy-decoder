@@ -22,8 +22,14 @@ require('dotenv').config();
 // This library provides a simple interface to the OpenAI API
 const OpenAI = require('openai');
 
+// Import mongoose for MongoDB connection and modeling
+const mongoose = require('mongoose');
+
 // Import our custom session manager
 const sessionManager = require('./sessionManager');
+
+// Import database models
+const { User, Policy, Message } = require('./models');
 
 // Create an instance of the OpenAI client with your API key from environment variables
 // Environment variables help keep sensitive data like API keys out of your code
@@ -35,6 +41,14 @@ const openai = new OpenAI({
 if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
   console.error('WARNING: OpenAI API key is not properly set. Please check your .env file.');
 }
+
+// Connect to MongoDB Atlas
+// The connection string is stored in the .env file for security
+const MONGODB_URI = process.env.DATABASE_URL || "mongodb+srv://rowan-fonda:u%23cT65h*i%40j5_8b@policy-decoder.g2j77.mongodb.net/?retryWrites=true&w=majority";
+
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('✅ Connected to MongoDB Atlas successfully!'))
+  .catch(err => console.error('❌ Failed to connect to MongoDB:', err.message));
 
 // Import our custom PDF parser module
 // This module will extract text from PDF files
@@ -840,6 +854,9 @@ app.use((err, req, res, next) => {
     message: err.message || 'Something went wrong!'
   });
 });
+
+// Import and use routes
+require('./routes')(app);
 
 // Start the server
 app.listen(PORT, '0.0.0.0', () => {
